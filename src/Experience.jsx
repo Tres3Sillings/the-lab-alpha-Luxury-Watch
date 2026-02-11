@@ -36,7 +36,7 @@ export default function Experience() {
           <Background />
           <Environment preset="city" />
           
-          <ScrollControls pages={5} damping={0.15}>
+          <ScrollControls pages={8} damping={.04} infinite={false}>
             {/* If the watch is missing, it might be too small or too big.
                 Try scale={10} first. If invisible, try scale={1}. */}
             <WatchModel scale={30} position={[5, -1, -5]}/>

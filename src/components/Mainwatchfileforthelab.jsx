@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useGLTF, useScroll } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
@@ -15,113 +15,115 @@ export default function Model(props) {
   const glassRef = useRef()
   const dialRef = useRef()
   const mechanismRef = useRef()
-  const mechanism2Ref = useRef()
-
-  // Material Ref for the "Pulse" effect
   const glassMaterialRef = useRef()
+
+  // Capture Refs for clean hand-offs
+  const lerpStartPos = useRef(new THREE.Vector3())
+  const lerpStartRot = useRef(new THREE.Euler())
+  const lerpStartExplosion = useRef({ glass: -0.015, dial: -0.015, mech: -0.015 })
 
   useEffect(() => {
     if (scene) {
       knobRef.current = scene.getObjectByName('adjustment_knob_main')
       hourHandRef.current = scene.getObjectByName('Hand_S') 
       minuteHandRef.current = scene.getObjectByName('Hand_L') 
-      
-      // Glass Setup
-      const glassMesh = scene.getObjectByName('Glass')
-      glassRef.current = glassMesh
-      if (glassMesh) {
-          // Clone material so we don't affect other transparent parts
-          glassMesh.material = glassMesh.material.clone()
-          glassMesh.material.transparent = true
-          glassMesh.material.opacity = 0.3
-          glassMesh.material.emissiveIntensity = 0
-          glassMaterialRef.current = glassMesh.material
-      }
-
+      glassRef.current = scene.getObjectByName('Glass')
       dialRef.current = scene.getObjectByName('Dial_main')
       mechanismRef.current = scene.getObjectByName('Mechanism')
       
-      const uniqueChild = scene.getObjectByName('Mechanism_2_1')
-      if (uniqueChild) mechanism2Ref.current = uniqueChild.parent
+      if (glassRef.current) {
+          glassRef.current.material = glassRef.current.material.clone()
+          glassRef.current.material.transparent = true
+          glassRef.current.material.opacity = 0.3
+          glassMaterialRef.current = glassRef.current.material
+      }
     }
   }, [scene])
 
   useFrame((state, delta) => {
-    // 1. Get Scroll Data
-    // We use a tighter damping or raw offset to prevent "missing" the animation
-    const r = scroll.offset // 0 to 1
+    const safeDelta = Math.min(delta, 0.1); 
+    const r = scroll.offset;
 
-    // --- PHASE 1: SAPPHIRE ZOOM (0.0 to 0.3) ---
-    // Goal: Zoom in close, Tilt down, Pulse Glass
-    if (r < 0.33) {
-        const t = r * 3 // Normalize 0-0.33 to 0-1
-        
-        // Move Watch Closer (Zoom Effect)
-        // From Z=0 to Z=3 (Very close to camera)
-        wholeWatchRef.current.position.z = THREE.MathUtils.lerp(1, 3, t)
-        
-        // Tilt to show reflection
-        wholeWatchRef.current.rotation.x = THREE.MathUtils.lerp(0, -0.3, t)
-        wholeWatchRef.current.rotation.y = THREE.MathUtils.lerp(0, 0.3, t)
+    // 1. Targets
+    let targetX = 0, targetY = 0, targetZ = 0;
+    let targetRotX = 0, targetRotY = 0;
+    let targetDialZ = -0.015, targetGlassZ = -0.015, targetMechZ = -0.015;
 
-        // PULSE EFFECT: Flash Blue
-        if (glassMaterialRef.current) {
-            // Sine wave pulse
-            const pulse = (Math.sin(state.clock.elapsedTime * 4) + 1) * 0.5
-            // Blend from Black (No emission) to Blue
-            glassMaterialRef.current.emissive.setRGB(0, 0.2 * pulse, 0.5 * pulse)
-            glassMaterialRef.current.emissiveIntensity = pulse * 2
-        }
+    if (wholeWatchRef.current) {
+      lerpStartPos.current.copy(wholeWatchRef.current.position);
+      lerpStartRot.current.copy(wholeWatchRef.current.rotation);
+    }
+
+    // --- PHASE LOGIC ---
+    if (r < 0.25) {
+      const t = r * 4;
+      targetX = THREE.MathUtils.lerp(0, -2, t);
+      targetZ = THREE.MathUtils.lerp(0, 4, t);
+      targetRotX = THREE.MathUtils.lerp(0, -0.4, t);
+      targetRotY = THREE.MathUtils.lerp(0, 1, t);
+      
+      if (glassMaterialRef.current) {
+        const pulse = (Math.sin(state.clock.elapsedTime * 4) + 1) * 0.5;
+        glassMaterialRef.current.emissive.setRGB(0, 0.2 * pulse, 0.5 * pulse);
+        glassMaterialRef.current.emissiveIntensity = pulse * 2;
+      }
     } 
-    
-    // --- PHASE 2: DIAL REVEAL (0.33 to 0.66) ---
-    // Goal: Zoom out slightly, Flat view, Glass explodes away
-    else if (r >= 0.33 && r < 0.66) {
-        const t = (r - 0.33) * 3 // Normalize
-
-        // Reset Pulse
-        if (glassMaterialRef.current) glassMaterialRef.current.emissiveIntensity = 0
-
-        // Move Camera Back slightly for overview
-        wholeWatchRef.current.position.z = THREE.MathUtils.lerp(3, 1, t)
-
-        // Rotate to Flat "Blueprint" View
-        wholeWatchRef.current.rotation.x = THREE.MathUtils.lerp(-0.3, 0, t)
-        wholeWatchRef.current.rotation.y = THREE.MathUtils.lerp(0.3, 0, t)
-
-        // EXPLOSION: Glass flies WAY off screen
-        if (glassRef.current) glassRef.current.position.z = -0.015 + (t * 0.5)
-        
-        // Dial lifts slightly
-        if (dialRef.current) dialRef.current.position.z = -0.015 + (t * 0.1)
-    }
-
-    // --- PHASE 3: MOVEMENT (0.66 to 1.0) ---
-    // Goal: Angle side view, Dial flies away, Gears exposed
+    else if (r < 0.50) {
+      const t = (r - 0.25) * 4;
+      if (glassMaterialRef.current) glassMaterialRef.current.emissiveIntensity = 0;
+      targetX = -2;
+      targetZ = THREE.MathUtils.lerp(4, 1, t);
+      targetRotX = THREE.MathUtils.lerp(-0.4, 0, t);
+      targetRotY = THREE.MathUtils.lerp(0.9, 0, t);
+      targetGlassZ = -0.015 + t * 0.9;
+      targetDialZ = -0.015 + t * 0.2;
+    } 
+    else if (r < 0.75) {
+      const t = (r - 0.50) * 4;
+      targetX = THREE.MathUtils.lerp(-2, 0, t); 
+      targetZ = THREE.MathUtils.lerp(1, 4, t);
+      targetGlassZ = 0.885; // Previous max
+      targetDialZ = 0.185 + (t * 0.1);
+      targetMechZ = -0.015 + (t * 0.1);
+    } 
     else {
-        const t = (r - 0.66) * 3 // Normalize
-
-        wholeWatchRef.current.position.z = THREE.MathUtils.lerp(1, 8, t)// Keep at overview distance
-
-        // Rotate to Side Profile
-        wholeWatchRef.current.rotation.y = THREE.MathUtils.lerp(0, 1.2, t)
-
-        // EXPLOSION: Dial flies away
-        if (dialRef.current) dialRef.current.position.z = (-0.015 + 0.1) + (t * 0.5)
-
-        // Hands fly with dial
-        if (hourHandRef.current) hourHandRef.current.position.z = dialRef.current.position.z
-        if (minuteHandRef.current) minuteHandRef.current.position.z = dialRef.current.position.z
-
-        // Mech expands
-        if (mechanismRef.current) mechanismRef.current.position.z = -0.015 + (t * 0.1)
+      const t = (r - 0.75) * 4;
+      targetZ = THREE.MathUtils.lerp(4, 14, t);
+      targetGlassZ = 0.885;
+      targetDialZ = 0.285 + (t * 0.5);
+      targetMechZ = 0.085 + (t * 0.1);
     }
 
-    // CONSTANT ANIMATIONS
-    if (knobRef.current) knobRef.current.rotation.x += delta * 2
-    if (hourHandRef.current) hourHandRef.current.rotation.y -= delta * 0.1 
-    if (minuteHandRef.current) minuteHandRef.current.rotation.y -= delta * 1.5 
-  })
+    // --- APPLY SMOOTHING (The Engine) ---
+    const watchSmooth = 4;
+    const partSmooth = 6; // Lighter parts move faster
 
-  return <primitive ref={wholeWatchRef} object={scene} {...props} />
+    // Whole Watch
+    wholeWatchRef.current.position.x = THREE.MathUtils.damp(wholeWatchRef.current.position.x, targetX, watchSmooth, safeDelta);
+    wholeWatchRef.current.position.y = THREE.MathUtils.damp(wholeWatchRef.current.position.y, targetY, watchSmooth, safeDelta);
+    wholeWatchRef.current.position.z = THREE.MathUtils.damp(wholeWatchRef.current.position.z, targetZ, watchSmooth, safeDelta);
+    wholeWatchRef.current.rotation.x = THREE.MathUtils.damp(wholeWatchRef.current.rotation.x, targetRotX, watchSmooth, safeDelta);
+    wholeWatchRef.current.rotation.y = THREE.MathUtils.damp(wholeWatchRef.current.rotation.y, targetRotY, watchSmooth, safeDelta);
+
+    // Floating Parts
+    if (dialRef.current) {
+      dialRef.current.position.z = THREE.MathUtils.damp(dialRef.current.position.z, targetDialZ, partSmooth, safeDelta);
+      // Hands locked to dial
+      if (hourHandRef.current) hourHandRef.current.position.z = dialRef.current.position.z;
+      if (minuteHandRef.current) minuteHandRef.current.position.z = dialRef.current.position.z;
+    }
+    if (glassRef.current) {
+      glassRef.current.position.z = THREE.MathUtils.damp(glassRef.current.position.z, targetGlassZ, partSmooth, safeDelta);
+    }
+    if (mechanismRef.current) {
+      mechanismRef.current.position.z = THREE.MathUtils.damp(mechanismRef.current.position.z, targetMechZ, partSmooth, safeDelta);
+    }
+
+    // Spin Animations
+    if (knobRef.current) knobRef.current.rotation.x += delta * 2;
+    if (hourHandRef.current) hourHandRef.current.rotation.y -= delta * 0.1;
+    if (minuteHandRef.current) minuteHandRef.current.rotation.y -= delta * 1.5;
+  });
+
+  return <primitive ref={wholeWatchRef} object={scene} position={[0, 0, 0]} {...props} />
 }
