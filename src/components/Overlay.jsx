@@ -1,104 +1,95 @@
-import { useScroll, Html } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
-import { useState } from 'react'
+import React from 'react'
 
-const Section = (props) => {
-  return (
-    <section 
-      style={{
-        // FIXED: This forces the text to ignore scrolling and stay on screen
-        position: 'fixed', 
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: props.align === 'right' ? 'flex-end' : props.align === 'left' ? 'flex-start' : 'center',
-        padding: '5vw',
-        pointerEvents: 'none',
-        // Opacity Logic
-        opacity: props.visible ? 1 : 0,
-        // Slide animation
-        transform: props.visible ? 'translateY(0)' : 'translateY(20px)',
-        transition: 'opacity 0.8s ease, transform 0.8s ease',
-      }}
-    >
-      <div style={{ pointerEvents: 'none' }}>
-        {props.children}
-      </div>
-    </section>
-  )
-}
-
-export default function Overlay() {
-  const scroll = useScroll()
-  const [phase, setPhase] = useState(0)
-
-  useFrame(() => {
-    // Monitor scroll position (0 to 1)
-    const val = scroll.offset
-    
-    // Define the "Scenes"
-    // 0 = Intro, 1 = Sapphire, 2 = Dial, 3 = Movement
-    if (val < 0.15) setPhase(0)
-    else if (val >= 0.15 && val < 0.40) setPhase(1)
-    else if (val >= 0.40 && val < 0.65) setPhase(2)
-    else if (val >= 0.65) setPhase(3)
-  })
+export default function Overlay({ progress }) {
+  // Checkpoints for the text based on normalized scroll progress (0.0 to 1.0)
+  const sections = [
+    { 
+      id: 'sapphire', 
+      title: 'Sapphire Crystal', 
+      text: 'Ultra-tough protection.',
+      visible: progress > 0.1 && progress < 0.4, // Adjusted for the new zoom phase
+      align: 'right'
+    },
+    { 
+      id: 'dial', 
+      title: 'Skeleton Dial', 
+      text: 'Precision engineering.',
+      visible: progress > 0.4 && progress < 0.7,
+      align: 'right'
+    },
+    { 
+      id: 'mech', 
+      title: 'Caliber 82S7', 
+      text: '42-hour power reserve.',
+      visible: progress > 0.7,
+      align: 'center'
+    }
+  ]
 
   return (
-    // <Html fullscreen> is great, but we add 'fixed' inside Section just to be safe.
-    <Html fullscreen style={{ pointerEvents: 'none' }}>
-      
-      {/* PHASE 1: SAPPHIRE CRYSTAL (Right) */}
-      <Section visible={phase === 1} align="right">
-        <h1 style={{ 
-            color: 'white', fontSize: '4rem', fontWeight: '800', 
-            textTransform: 'uppercase', textAlign: 'right', margin: 0,
-            textShadow: '0 5px 15px rgba(0,0,0,0.5)'
-        }}>
-          Sapphire<br/>Crystal
-        </h1>
-        <div style={{ height: '4px', width: '100px', background: 'white', margin: '10px 0 10px auto' }}></div>
-        <p style={{ color: '#ccc', fontSize: '1.2rem', textAlign: 'right', maxWidth: '300px', fontFamily: 'sans-serif' }}>
-          Scratch-resistant synthetic sapphire with anti-reflective coating.
-        </p>
-      </Section>
-
-      {/* PHASE 2: SKELETON DIAL (Left) */}
-      <Section visible={phase === 2} align="left">
-        <h1 style={{ 
-            color: 'white', fontSize: '4rem', fontWeight: '800', 
-            textTransform: 'uppercase', margin: 0,
-            textShadow: '0 5px 15px rgba(0,0,0,0.5)'
-        }}>
-          Skeleton<br/>Dial
-        </h1>
-        <div style={{ height: '4px', width: '100px', background: 'white', margin: '10px auto 10px 0' }}></div>
-        <p style={{ color: '#ccc', fontSize: '1.2rem', maxWidth: '300px', fontFamily: 'sans-serif' }}>
-          Intricate open-work design showcasing the inner mechanics.
-        </p>
-      </Section>
-
-      {/* PHASE 3: MOVEMENT (Center Bottom) */}
-      <Section visible={phase === 3} align="center">
-        <div style={{ marginTop: '50vh' }}> {/* Push text to bottom of screen */}
-            <h1 style={{ 
-                color: 'white', fontSize: '4rem', fontWeight: '800', 
-                textTransform: 'uppercase', textAlign: 'center', margin: 0,
-                textShadow: '0 5px 15px rgba(0,0,0,0.5)'
-            }}>
-            Caliber 82S7
-            </h1>
-            <div style={{ height: '4px', width: '100px', background: 'white', margin: '10px auto' }}></div>
-            <p style={{ color: '#ccc', fontSize: '1.2rem', textAlign: 'center', fontFamily: 'sans-serif' }}>
-            Automatic movement with 42-hour power reserve.
-            </p>
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      zIndex: 10,
+      pointerEvents: 'none',
+      fontFamily: "'Helvetica Neue', Arial, sans-serif"
+    }}>
+      {sections.map((s) => (
+        <div
+          key={s.id}
+          style={{
+            position: 'absolute',
+            top: '50%',
+            // Alignment logic
+            left: s.align === 'left' ? '10%' : s.align === 'right' ? 'auto' : '50%',
+            right: s.align === 'right' ? '10%' : 'auto',
+            
+            // Unified Transform: Handles both centering and the entrance animation
+            transform: `translate(${s.align === 'center' ? '-50%' : '0'}, -50%) 
+                        ${s.visible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.95)'}`,
+            
+            opacity: s.visible ? 1 : 0,
+            filter: s.visible ? 'blur(0px)' : 'blur(10px)',
+            transition: 'all 0.4s ease-out', // Snappy transition for fast scrolling
+            textAlign: s.align,
+          }}
+        >
+          <h1 style={{ 
+            color: 'white', 
+            fontSize: '5vw', 
+            margin: 0, 
+            textTransform: 'uppercase',
+            lineHeight: 1,
+            textShadow: '0 10px 30px rgba(0,0,0,0.5)' 
+          }}>
+            {s.title}
+          </h1>
+          <p style={{ 
+            color: '#aaa', 
+            fontSize: '1.5vw', 
+            marginTop: '10px',
+            fontWeight: '300' 
+          }}>
+            {s.text}
+          </p>
         </div>
-      </Section>
+      ))}
 
-    </Html>
+      {/* FIXED BRANDING */}
+      <div style={{ 
+        position: 'absolute', 
+        top: 40, 
+        left: 40, 
+        color: 'white', 
+        letterSpacing: '2px',
+        fontWeight: 'bold', 
+        pointerEvents: 'all' 
+      }}>
+        THE LAB / ALPHA
+      </div>
+    </div>
   )
 }

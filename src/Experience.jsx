@@ -1,38 +1,47 @@
-import { Suspense } from 'react'
-import { Canvas } from '@react-three/fiber'
-import { Environment, ScrollControls, Hud, OrthographicCamera, Center } from '@react-three/drei'
+import { Suspense, useState, useRef } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { Environment, ScrollControls, useScroll } from '@react-three/drei'
+import WatchModel from './components/Mainwatchfileforthelab'
 import Background from './components/Background'
-import WatchModel from './components/WatchModel'
+import Overlay from './components/Overlay'
+
+// Helper to sync scroll progress
+function ScrollHandler({ setProgress }) {
+  const scroll = useScroll()
+  useFrame(() => {
+    setProgress(scroll.offset)
+  })
+  return null
+}
 
 export default function Experience() {
+  const [progress, setProgress] = useState(0)
+
   return (
     <div style={{ width: '100vw', height: '100vh', background: '#000' }}>
+      
+      {/* 1. TEXT LAYER (Now using the CSS class) */}
+      <div className="overlay-container">
+         <Overlay progress={progress} />
+      </div>
+
+      {/* 2. 3D SCENE */}
       <Canvas 
-        shadows
-        camera={{ position: [0, 0, 10], fov: 30 }} 
+        shadows 
+        // Camera z=12 is usually safe for scale=10 objects
+        camera={{ position: [0, 0, 12], fov: 30 }}
+        style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
       >
         <Suspense fallback={null}>
-            
-            {/* 1. BACKGROUND LAYER (HUD)
-               This sits "behind" the world. 
-               renderPriority={-1} forces it to render first.
-            */}
-            <Hud renderPriority={-1}>
-              <OrthographicCamera makeDefault manual top={1} bottom={-1} left={-1} right={1} near={0} far={1} />
-              <Background />
-            </Hud>
-
-            {/* 2. SCROLLABLE CONTENT LAYER */}
-            <Environment preset="city" />
-            
-            {/* pages={5} makes the scroll area very tall (5 screens) for a long animation */}
-            <ScrollControls pages={5} damping={0.2}>
-                <Center>
-                   {/* Scale 15 might be huge depending on file, feel free to adjust to 10 or 12 */}
-                   <WatchModel scale={12} /> 
-                </Center>
-            </ScrollControls>
-
+          <Background />
+          <Environment preset="city" />
+          
+          <ScrollControls pages={5} damping={0.15}>
+            {/* If the watch is missing, it might be too small or too big.
+                Try scale={10} first. If invisible, try scale={1}. */}
+            <WatchModel scale={30} position={[5, -1, -5]}/>
+            <ScrollHandler setProgress={setProgress} />
+          </ScrollControls>
         </Suspense>
       </Canvas>
     </div>
