@@ -1,98 +1,70 @@
 import React, { useEffect, useRef } from 'react'
-import { useGLTF } from '@react-three/drei'
+import { useGLTF, useScroll } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
-// Accept scrollProgress as a prop (0.0 = closed, 1.0 = fully open)
-export default function Model({ scrollProgress = 0, ...props }) {
-  // 1. Load the scene
+export default function Model(props) {
   const { scene } = useGLTF('/mainwatchfileforthelab.glb')
+  const scroll = useScroll()
 
+  // Refs
   const wholeWatchRef = useRef()
   const knobRef = useRef()
   const hourHandRef = useRef()
   const minuteHandRef = useRef()
   const glassRef = useRef()
-  // New refs for the explosion layers
   const dialRef = useRef()
   const mechanismRef = useRef()
   const mechanism2Ref = useRef()
 
-  // Base Z position roughly where the face sits (from previous code)
   const baseZ = -0.015;
 
-  // 2. Grab all necessary parts by name
   useEffect(() => {
     if (scene) {
-      // console.log("Grabbing parts for explosion effect...");
       knobRef.current = scene.getObjectByName('adjustment_knob_main')
-      // Trying parent groups for hands first for better rotation center
-      hourHandRef.current = scene.getObjectByName('Hand_S') || scene.getObjectByName('Hand_S_1')
-      minuteHandRef.current = scene.getObjectByName('Hand_L') || scene.getObjectByName('Hand_L_1')
+      hourHandRef.current = scene.getObjectByName('Hand_S') 
+      minuteHandRef.current = scene.getObjectByName('Hand_L') 
       glassRef.current = scene.getObjectByName('Glass')
-      
-      // Grab the new layers based on Blender hierarchy
-      dialRef.current = scene.getObjectByName('Dial')
+      dialRef.current = scene.getObjectByName('Dial_main')
       mechanismRef.current = scene.getObjectByName('Mechanism')
-      mechanism2Ref.current = scene.getObjectByName('Mechanism_2')
+      
+      const uniqueChild = scene.getObjectByName('Mechanism_2_1')
+      if (uniqueChild) mechanism2Ref.current = uniqueChild.parent
     }
   }, [scene])
 
-  // 3. Animate based on scrollProgress prop
   useFrame((state, delta) => {
-    
-    // --- A. CONSTANT ANIMATIONS (Hands & Knob) ---
+    const rTilt = scroll.range(0, 0.2)
+    const rExplode = scroll.range(0.2, 0.8)
+
+    // 1. PASSIVE ANIMATION
     if (knobRef.current) knobRef.current.rotation.x += delta * 2
     if (hourHandRef.current) hourHandRef.current.rotation.y -= delta * 0.1 
     if (minuteHandRef.current) minuteHandRef.current.rotation.y -= delta * 1.5 
 
-    // --- B. EXPLOSION EFFECT (Based on scrollProgress prop) ---
-    // We move parts along Z axis to separate them
-    // The multiplier determines how far that part moves.
-
-    // Glass: Moves farthest (e.g., 15 units out)
-    if (glassRef.current) {
-       glassRef.current.position.z = baseZ + (scrollProgress * 0.15)
-    }
-
-    // Dial & Hands: Move together, medium distance (e.g., 10 units out)
-    const dialDistance = baseZ + (scrollProgress * 0.10);
-    if (dialRef.current) dialRef.current.position.z = dialDistance
-    if (hourHandRef.current) hourHandRef.current.position.z = dialDistance
-    if (minuteHandRef.current) minuteHandRef.current.position.z = dialDistance
-
-    // Mechanism 1: Moves slightly (e.g., 5 units out)
-    if (mechanismRef.current) {
-        mechanismRef.current.position.z = baseZ + (scrollProgress * 0.05)
-    }
-
-    // Mechanism 2: Moves barely (e.g., 2 units out)
-    if (mechanism2Ref.current) {
-        mechanism2Ref.current.position.z = baseZ + (scrollProgress * 0.02)
-    }
-    
-    // Case: Stays put at baseZ (or you could move it slightly backward: baseZ - (scrollProgress * 0.01))
-
-    // --- C. CINEMATIC TILT ---
-    // Rotate the entire watch slightly as it explodes to show depth.
+    // 2. CINEMATIC TILT (Phase 1)
     if (wholeWatchRef.current) {
-        // Start with initial tilt angles defined in App.jsx, then add scroll factor
-        // We use linear interpolation (lerp) for smooth transition
-        
-        // Tilt X up slightly as it opens
-        wholeWatchRef.current.rotation.x = THREE.MathUtils.lerp(props.rotation[0], props.rotation[0] + 0.3, scrollProgress)
-        // Rotate Y sideways slightly as it opens
-        wholeWatchRef.current.rotation.y = THREE.MathUtils.lerp(props.rotation[1], props.rotation[1] - 0.4, scrollProgress)
+        wholeWatchRef.current.rotation.x = THREE.MathUtils.lerp(0.2, 0.5, rTilt)
+        wholeWatchRef.current.rotation.y = THREE.MathUtils.lerp(-0.2, -0.9, rTilt)
+        wholeWatchRef
     }
+
+    // 3. EXPLOSION (Phase 2)
+    if (wholeWatchRef.current) {
+      // Move watch closer to camera (simulated scale)
+      wholeWatchRef.current.position.z = THREE.MathUtils.lerp(0, 5, rExplode)
+    }
+
+    if (glassRef.current) glassRef.current.position.z = (baseZ + 0.005) + (rExplode * 0.35)
+    
+    const dialDist = baseZ + (rExplode * 0.20);
+    if (dialRef.current) dialRef.current.position.z = dialDist
+    if (hourHandRef.current) hourHandRef.current.position.z = dialDist
+    if (minuteHandRef.current) minuteHandRef.current.position.z = dialDist
+
+    if (mechanismRef.current) mechanismRef.current.position.z = baseZ + (rExplode * 0.10)
+    if (mechanism2Ref.current) mechanism2Ref.current.position.z = baseZ + (rExplode * 0.04)
   })
 
-  return (
-    <primitive 
-      ref={wholeWatchRef}
-      object={scene} 
-      {...props} // Passes initial rotation/scale from App.jsx
-    />
-  )
+  return <primitive ref={wholeWatchRef} object={scene} {...props} />
 }
-
-useGLTF.preload('/mainwatchfileforthelab.glb')

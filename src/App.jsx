@@ -1,29 +1,37 @@
-import { Suspense } from 'react' // <--- IMPORT THIS
+import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { Environment, Center } from '@react-three/drei'
-import Background from './components/Background'
-import WatchModel from './components/Mainwatchfileforthelab' // Make sure filename matches exactly
+import { Environment, ScrollControls, Center } from '@react-three/drei'
+import WatchModel from './components/Mainwatchfileforthelab'
+import Overlay from './components/Overlay'
 
-export default function App() {
+export default function Experience() {
   return (
-    <div style={{ width: '100vw', height: '100vh', background: '#000' }}>
+    <div style={{ 
+      width: '100vw', 
+      height: '100vh', 
+      background: 'radial-gradient(circle at center, #1a1a1a 0%, #000000 100%)',
+    }}>
       <Canvas 
         shadows
-        camera={{ position: [0, 0, 10], fov: 30 }} 
+        gl={{ alpha: true }} 
+        camera={{ position: [0, 0, 12], fov: 30 }} 
       >
-        {/* FIX 2: Wrap everything 3D in Suspense */}
         <Suspense fallback={null}>
-            
-            <Background />
             <Environment preset="city" />
             
-            <Center>
-                {/* Check your scale! If the model is huge/tiny it might vanish. 
-                   Start with scale={1} if 15 is too big. 
-                */}
-                <WatchModel scale={30} rotation={[0.2, -0.5, 0]} /> 
-            </Center>
+            <ScrollControls pages={5} damping={0.3}>
+                
+                {/* 3D CONTENT (Fixed in Center) */}
+                <Center>
+                    <WatchModel scale={15} /> 
+                </Center>
 
+                {/* HTML OVERLAY (Fixed on Screen) 
+                    Notice: NO <Scroll> wrapper here. 
+                */}
+                <Overlay />
+
+            </ScrollControls>
         </Suspense>
       </Canvas>
     </div>
