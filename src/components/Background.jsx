@@ -13,7 +13,7 @@ const Background = () => {
     uMouse: { value: new THREE.Vector2(0, 0) },
     uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
     uColorA: { value: new THREE.Color('#080808') }, // Deep Black
-    uColorB: { value: new THREE.Color('#0d29a3') }, // Subtle Grey
+    uColorB: { value: new THREE.Color('#202020') }, // Subtle Grey
   }), []);
 
   useFrame((state) => {

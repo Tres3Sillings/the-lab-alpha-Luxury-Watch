@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 export default function Overlay({ progress }) {
   // 1. HERO SECTION: Visible only at the very start (0 to 5% scroll)
@@ -152,12 +153,13 @@ export default function Overlay({ progress }) {
 ))}
 
       {/* FIXED BRANDING */}
-      <div style={{ 
+      <a href="/home" style={{ 
         position: 'absolute', top: 40, left: 40, color: 'white', 
-        letterSpacing: '2px', fontWeight: 'bold', pointerEvents: 'all' 
+        letterSpacing: '2px', fontWeight: 'bold', pointerEvents: 'all',
+        textDecoration: 'none'
       }}>
         THE LAB / ALPHA
-      </div>
+      </a>
     </div>
   )
 }
