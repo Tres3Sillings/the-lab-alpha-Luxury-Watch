@@ -153,13 +153,19 @@ export default function Overlay({ progress }) {
 ))}
 
       {/* FIXED BRANDING */}
-      <a href="/home" style={{ 
-        position: 'absolute', top: 40, left: 40, color: 'white', 
-        letterSpacing: '2px', fontWeight: 'bold', pointerEvents: 'all',
-        textDecoration: 'none'
-      }}>
-        THE LAB / ALPHA
-      </a>
+<Link 
+  to="/home" 
+  className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 hover:text-white transition-colors"
+  style={{ 
+    position: 'absolute', // Ensure it's positioned
+    top: '32px',          // 8 * 4px (tailwind 'top-8')
+    left: '32px',         // 8 * 4px (tailwind 'left-8')
+    pointerEvents: 'auto', // 👈 THIS IS THE FIX
+    zIndex: 20            // Ensure it sits above everything else
+  }}
+>
+  ← THE LAB / ALPHA
+</Link>
     </div>
   )
 }
