@@ -11,9 +11,14 @@ export function Model(props) {
   return (
     <group {...props} dispose={null}>
       <mesh geometry={nodes.Laces_R.geometry} material={materials.MAT_Laces_R} />
-      <mesh geometry={nodes.Shoe_R.geometry} material={materials.MAT_Shoe_R} />
-      <mesh geometry={nodes.Sole_R.geometry} material={materials.MAT_Sole_R} />
+      <mesh geometry={nodes.High_Top_R.geometry} material={materials.MAT_Shoe_R} />
+      <mesh geometry={nodes.Sole_Inside_R.geometry} material={materials.MAT_Sole_R} />
       <mesh geometry={nodes.Swoosh_R.geometry} material={materials.MAT_Shoe_R} />
+      <mesh geometry={nodes.Sole_R.geometry} material={materials.MAT_Shoe_R} />
+      <mesh geometry={nodes.Straps_R.geometry} material={materials.MAT_Shoe_R} />
+      <mesh geometry={nodes.Leather_1_R.geometry} material={materials.MAT_Shoe_R} />
+      <mesh geometry={nodes.Base_R.geometry} material={materials.MAT_Shoe_R} />
+      <mesh geometry={nodes.Lace_Holder_R.geometry} material={materials.MAT_Shoe_R} />
     </group>
   )
 }
