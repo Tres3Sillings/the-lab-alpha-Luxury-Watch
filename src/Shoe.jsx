@@ -1,10 +1,32 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useGLTF, Environment, ContactShadows, OrbitControls } from '@react-three/drei'
+import { useGLTF, Environment, ContactShadows, OrbitControls, useProgress } from '@react-three/drei' // Added useProgress
 import * as THREE from 'three'
 
-// --- 1. The Model Component ---
+// --- 1. The Loader Component ---
+function ShoeLoader() {
+  const { active } = useProgress()
+  if (!active) return null
+
+  return (
+    <div className="loader-shoe-container">
+      <svg 
+        width="200"  // Controls the size on screen (adjust as needed)
+        viewBox="0 0 1000 356" // Matches your new SVG's dimensions
+        className="overflow-visible"
+      >
+        <path 
+          className="nike-swoosh-path" 
+          // I removed fill="#000" so CSS can control the color
+          d="M 125.35 356.00 L 116.80 356.00 C 107.86 355.71 96.04 355.19 86.77 353.25 Q 80.64 351.97 73.81 350.00 Q 56.93 345.13 42.85 335.64 Q 36.94 331.66 31.71 326.45 Q 25.76 320.52 21.70 315.76 C 14.87 307.78 8.98 297.61 5.62 286.64 Q 2.69 277.06 1.87 272.93 Q 0.35 265.18 0.00 253.36 L 0.00 244.80 C 0.67 239.10 0.97 233.03 1.83 227.77 Q 5.44 205.70 13.33 184.81 Q 25.78 151.86 45.33 121.57 Q 54.76 106.97 59.22 100.97 Q 83.44 68.41 102.61 46.59 Q 115.31 32.14 144.21 0.39 A 0.09 0.09 0.0 0 1 144.36 0.49 C 138.93 9.86 133.52 19.16 128.77 29.47 Q 118.06 52.77 112.37 73.30 Q 105.72 97.30 106.41 120.99 Q 106.85 135.83 112.37 150.96 Q 118.45 167.63 131.56 180.98 Q 141.89 191.49 154.51 197.20 C 157.03 198.34 162.19 200.71 166.10 201.83 Q 179.98 205.77 190.00 206.75 C 200.43 207.77 214.20 207.95 226.32 206.79 Q 242.39 205.25 254.75 203.02 Q 263.94 201.36 282.65 196.40 Q 559.52 122.95 997.91 6.58 A 0.32 0.17 -21.9 0 1 998.16 6.61 Q 998.19 6.64 998.21 6.66 A 0.08 0.06 -22.8 0 1 998.16 6.75 Q 482.94 227.10 298.40 305.93 Q 280.26 313.68 252.10 325.05 Q 225.13 335.95 197.12 343.85 Q 161.90 353.78 125.35 356.00 Z"
+        />
+      </svg>
+    </div>
+  )
+}
+
+// --- 2. The Model Component (Unchanged) ---
 function Shoethelab({ partColors, ...props }) {
   const { nodes, materials } = useGLTF('/Shoethelab.glb')
   const meshRefs = useRef({})
@@ -59,8 +81,6 @@ const PRESET_COLORS = [
 export default function Shoe() {
   const [activeSection, setActiveSection] = useState('Base')
   const [activePart, setActivePart] = useState('Base')
-  
-  // Ref for the hidden color input
   const colorPickerRef = useRef()
 
   const [partColors, setPartColors] = useState({
@@ -82,6 +102,9 @@ export default function Shoe() {
   return (
     <div className="h-screen w-full bg-[#050505] text-white flex flex-col md:flex-row font-sans overflow-hidden">
       
+      {/* --- ADD THE LOADER HERE --- */}
+      <ShoeLoader />
+
       {/* LEFT: 3D Viewport */}
       <div className="relative w-full md:w-3/4 h-[60vh] md:h-full bg-[#050505]">
         <div className="absolute top-8 left-8 z-10 pointer-events-none">
@@ -97,11 +120,13 @@ export default function Shoe() {
           <ambientLight intensity={0.5} />
           <spotLight position={[5, 5, 5]} angle={0.15} penumbra={1} castShadow />
           <spotLight position={[-5, 5, -5]} angle={0.15} penumbra={1} intensity={0.5} />
+          
           <React.Suspense fallback={null}>
             <Shoethelab partColors={partColors} rotation={[0, -Math.PI / 4, 0]} position={[0, -0.08, 0]} />
             <Environment preset="city" />
             <ContactShadows position={[0, -0.12, 0]} opacity={0.4} scale={2} blur={2.5} />
           </React.Suspense>
+          
           <OrbitControls makeDefault enablePan={false} minPolarAngle={0} maxPolarAngle={Math.PI / 2} />
         </Canvas>
 
@@ -154,8 +179,6 @@ export default function Shoe() {
         <div className="p-8 flex-1 overflow-y-auto">
           <p className="text-[10px] uppercase tracking-widest text-zinc-600 mb-4">Material Color</p>
           <div className="grid grid-cols-4 gap-3">
-            
-            {/* 1. The Presets */}
             {PRESET_COLORS.map(color => (
               <button
                 key={color.name}
@@ -167,16 +190,12 @@ export default function Shoe() {
               />
             ))}
 
-            {/* 2. The Custom Picker Button */}
             <button
               onClick={() => colorPickerRef.current.click()}
               className="relative w-full aspect-square rounded-xl border-2 border-dashed border-zinc-700 hover:border-white transition-colors flex items-center justify-center group overflow-hidden"
             >
-              {/* Rainbow Background */}
               <div className="absolute inset-0 bg-gradient-to-br from-red-500 via-green-500 to-blue-500 opacity-20 group-hover:opacity-40 transition-opacity" />
               <span className="text-xl font-bold text-white z-10">+</span>
-              
-              {/* Hidden Native Input */}
               <input 
                 ref={colorPickerRef}
                 type="color" 
@@ -184,7 +203,6 @@ export default function Shoe() {
                 onChange={(e) => handleColorChange(e.target.value)}
               />
             </button>
-
           </div>
         </div>
 
@@ -199,7 +217,6 @@ export default function Shoe() {
             </button>
           </div>
         </div>
-
       </div>
     </div>
   )
