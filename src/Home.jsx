@@ -1,215 +1,221 @@
-import React, { useState, useRef } from 'react'
-import { Canvas, useThree } from '@react-three/fiber'
-import { useGLTF, Environment, ContactShadows, Html, OrbitControls } from '@react-three/drei'
-import gsap from 'gsap'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useState, useEffect, useRef, Suspense } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { Environment, ContactShadows, useGLTF, Html } from '@react-three/drei'
 import * as THREE from 'three'
+import { motion, AnimatePresence } from 'framer-motion'
+import { easing } from 'maath'
 
-/* --- 1. THE 3D MODEL COMPONENT --- */
-function Model({ onDeskClick, ...props }) {
-  const { nodes, materials } = useGLTF('/rooomtestthing.glb')
-  
-  // This function handles the click logic
-  const handleClick = () => {
-    if (onDeskClick) onDeskClick()
-  }
+// --- 1. CONFIGURATION ---
+// Define where the camera goes for each state
+const CAMERA_STATES = {
+  intro: [
+    { pos: [-0.92, 18.96, 0.05], target: [-0.92, 0, 0.05] }, // Step 0: High up
+    { pos: [0.22, 2.07, -0.05], target: [2.53, 1.29, -0.11] }, // Step 1: Eye level
+  ],
+  // "Zoomed In" views. Tweak 'pos' to get closer/further
+  shoe: { pos: [4.5, 1.8, 2.0], target: [5.43, 1.6, 0.02] }, 
+  watch: { pos: [-1.0, 1.5, 2.0], target: [-1.0, 1.0, 0] }, // Placeholder coordinates
+}
+
+// --- 2. CAMERA RIG ---
+function CameraRig({ introStep, activeProject, isStarted }) {
+  useFrame((state, delta) => {
+    if (!isStarted) return
+
+    // Determine where we want to be
+    let targetPos, targetLook
+    
+    if (activeProject) {
+      // If a project is clicked, use its specific config
+      const cfg = CAMERA_STATES[activeProject]
+      targetPos = cfg.pos
+      targetLook = cfg.target
+    } else {
+      // Otherwise use the intro sequence
+      const cfg = CAMERA_STATES.intro[introStep]
+      targetPos = cfg.pos
+      targetLook = cfg.target
+    }
+
+    // Smoothly move camera position
+    easing.damp3(state.camera.position, targetPos, 0.4, delta)
+
+    // Smoothly look at the target (using a dummy vector to avoid creating new objects)
+    const lookAtVec = new THREE.Vector3(...targetLook)
+    
+    // We dampen the quaternion (rotation) for the smoothest lookAt possible
+    // standard lookAt can be jerky, so we soft-update it
+    const q = new THREE.Quaternion()
+    q.setFromRotationMatrix(new THREE.Matrix4().lookAt(state.camera.position, lookAtVec, state.camera.up))
+    easing.dampQ(state.camera.quaternion, q, 0.4, delta)
+  })
+
+  return null
+}
+
+// --- 3. THE MODEL (With Scroll Rotation & Click Logic) ---
+function Model({ onProjectSelect, activeProject, ...props }) {
+  const { nodes, materials } = useGLTF('/TheLabHub_V2-transformed.glb')
+  const groupRef = useRef()
+  const [rotation, setRotation] = useState(0)
+
+  // Scroll Listener
+  useEffect(() => {
+    const handleScroll = (e) => {
+      // Only rotate if we aren't zoomed in on a project
+      if (!activeProject) {
+        setRotation((r) => r + e.deltaY * 0.0005)
+      }
+    }
+    window.addEventListener('wheel', handleScroll)
+    return () => window.removeEventListener('wheel', handleScroll)
+  }, [activeProject])
+
+  useFrame((state, delta) => {
+    // Smoothly rotate the room based on scroll
+    easing.dampE(groupRef.current.rotation, [0, rotation, 0], 0.3, delta)
+  })
+
+  // Helper for cursor hover
+  const [hovered, setHover] = useState(null)
+  useEffect(() => {
+    document.body.style.cursor = hovered ? 'pointer' : 'auto'
+  }, [hovered])
 
   return (
-    <group {...props} dispose={null}>
-      {/* MONITOR GROUP */}
-      <group position={[0.915, 0.76, 0.915]} rotation={[Math.PI, 0, Math.PI]}>
-        <mesh geometry={nodes.Foot.geometry} material={materials.BlackPlastic} position={[0, 0.251, 0.024]} />
-        <mesh geometry={nodes.Handles.geometry} material={materials.BlackPlastic} position={[0.145, 0.2, 0.018]} rotation={[-0.217, 0, 0]} />
-        <mesh geometry={nodes.Screen.geometry} material={materials.Screen} position={[0, 0.244, 0.013]} rotation={[1.353, 0, 0]} />
-        <mesh geometry={nodes.Screen2.geometry} material={materials.BlackPlastic} position={[0, 0.244, 0.013]} rotation={[1.353, 0, 0]}>
-          <mesh geometry={nodes.Cutter.geometry} material={nodes.Cutter.material} position={[0.145, -0.012, 0]} rotation={[0, 0, Math.PI]} scale={[1, 1, 0.872]} />
-        </mesh>
-      </group>
-
-      {/* KEYBOARD GROUP (Simplified for brevity, kept all your meshes) */}
-      <group position={[0.89, 0.762, 0.683]} rotation={[0, -1.571, 0]}>
-        {/* ... (Keep all your keyboard meshes here, I collapsed them to save space for you) ... */}
-        <mesh geometry={nodes.Cube005.geometry} material={materials['keyboard key.001']} position={[-0.015, 0.023, 0.171]} />
-        <mesh geometry={nodes.Cube006.geometry} material={materials['keyboard key.001']} position={[0.007, 0.023, 0.165]} />
-        {/* ... rest of keyboard ... */}
-      </group>
-
-      {/* ROOM BASICS */}
-      <mesh geometry={nodes.Floor.geometry} material={materials['Wood Floor.001']} />
-      <mesh geometry={nodes.Walls.geometry} material={materials['Painted Wall Procedural']} />
-
-      {/* --- THE TRIGGER --- */}
+    <group ref={groupRef} {...props} dispose={null}>
+      <mesh geometry={nodes.Center_floor.geometry} material={materials['Wet Asphalt Surface']} />
+      <mesh geometry={nodes.Floor.geometry} material={materials['Wet Cracked Asphalt']} />
+      <mesh geometry={nodes.Pillars.geometry} material={materials['Anthracite Grey Plastic']} />
+      <mesh geometry={nodes.Roof.geometry} material={materials['Matte plastic plate with holes']} />
+      <mesh geometry={nodes.arcade_3002_screen.geometry} material={materials['pantalas.001']} />
+      
+      {/* --- HITBOXES --- */}
+      {/* SHOE HITBOX */}
       <mesh 
-        geometry={nodes.Desk_Trigger.geometry} 
-        material={materials['Material.103']} 
-        position={[0.856, 0.828, 0.536]} 
-        scale={[1, 1, 0.526]} 
-        onClick={handleClick} // <--- The Magic Click Event
-        onPointerOver={() => document.body.style.cursor = 'pointer'}
-        onPointerOut={() => document.body.style.cursor = 'default'}
-        visible={false} // Make it invisible to the user!
+        geometry={nodes.Shoe_HitBox.geometry} 
+        material={materials.HitBox} 
+        position={[5.437, 1.607, 0.027]} 
+        visible={false} // Make invisible but clickable
+        onClick={(e) => { e.stopPropagation(); onProjectSelect('shoe') }}
+        onPointerOver={() => setHover(true)}
+        onPointerOut={() => setHover(false)}
       />
 
-      {/* DESK */}
-      <group position={[0.876, 0, 0.736]} rotation={[Math.PI, 0, Math.PI]}>
-        <mesh geometry={nodes.Desk.geometry} material={materials.DeskBody} />
-        <mesh geometry={nodes.Desk_1.geometry} material={materials.TableTop} />
-        <mesh geometry={nodes.Desk_2.geometry} material={materials.Handle} />
-      </group>
+      {/* WATCH HITBOX (Placeholder: I attached it to the arcade screen since Watch_HitBox was missing in your snippet) */}
+      <mesh 
+        geometry={nodes.arcade_3002_screen.geometry} 
+        material={materials['pantalas.001']}
+        onClick={(e) => { e.stopPropagation(); onProjectSelect('watch') }}
+        onPointerOver={() => setHover(true)}
+        onPointerOut={() => setHover(false)}
+      >
+         {/* Optional: Add a visual indicator on hover */}
+         <meshBasicMaterial color="white" transparent opacity={hovered ? 0.1 : 0} />
+      </mesh>
+
+      {/* REST OF SCENE */}
+      <mesh geometry={nodes.Cube018.geometry} material={materials['plastic.001']} />
+      <mesh geometry={nodes.Cube018_1.geometry} material={materials['metal.001']} />
+      <mesh geometry={nodes.Cube018_2.geometry} material={materials['covers .001']} />
+      <mesh geometry={nodes.Cube018_3.geometry} material={materials['coin arcade.001']} />
+      <mesh geometry={nodes.Cube019.geometry} material={materials['buttons arcade.001']} />
+      <mesh geometry={nodes.Cube019_1.geometry} material={materials['red plastic.001']} />
     </group>
   )
 }
 
-/* --- 2. CAMERA CONTROLLER --- */
-function CameraController({ zoom }) {
-  const { camera, controls } = useThree()
+useGLTF.preload('/TheLabHub_V2-transformed.glb')
 
-  React.useEffect(() => {
-    // --- 1. ZOOMED IN (Desk View) ---
-    // ✅ I pasted your NEW Position numbers here:
-    const deskPosition = new THREE.Vector3(0.271, 1.311, -0.562)
-    
-    // ✅ I created a "Safe Bet" target (Looking at the Monitor):
-    const deskTarget = new THREE.Vector3(0.85, 0.75, 0.6) 
 
-    // --- 2. ZOOMED OUT (Room View) ---
-    // (These are the ones we fixed earlier)
-    const roomPosition = new THREE.Vector3(-0.875, 1.726, -1.826) 
-    const roomTarget = new THREE.Vector3(0, 1.0, 0) // Looking at room center
+// --- 4. MAIN PAGE ---
+export default function HomePage() {
+  const [isStarted, setIsStarted] = useState(false)
+  const [introStep, setIntroStep] = useState(0)
+  const [activeProject, setActiveProject] = useState(null)
 
-    if (zoom) {
-      // ZOOM IN ANIMATION
-      gsap.to(camera.position, {
-        x: deskPosition.x, y: deskPosition.y, z: deskPosition.z,
-        duration: 1.5, ease: "power2.inOut"
-      })
-      if(controls) {
-        gsap.to(controls.target, {
-          x: deskTarget.x, y: deskTarget.y, z: deskTarget.z,
-          duration: 1.5, ease: "power2.inOut"
-        })
-      }
-    } else {
-      // ZOOM OUT ANIMATION
-      gsap.to(camera.position, {
-        x: roomPosition.x, y: roomPosition.y, z: roomPosition.z,
-        duration: 1.5, ease: "power2.inOut"
-      })
-      
-      if(controls) {
-        gsap.to(controls.target, {
-          x: roomTarget.x, y: roomTarget.y, z: roomTarget.z,
-          duration: 1.5, ease: "power2.inOut"
-        })
-      }
-    }
-  }, [zoom, camera, controls])
-  return null
-}
+  const startExperience = () => {
+    setIsStarted(true)
+    setTimeout(() => setIntroStep(1), 300) 
+  }
 
-/* --- 3. THE MAIN PAGE COMPONENT --- */
-export default function Experience() {
-  const [zoomed, setZoomed] = useState(false)
+  // Back button handler
+  const resetView = () => {
+    setActiveProject(null)
+  }
 
   return (
-  <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
-    
-    {/* 3D SCENE */}
-    <Canvas camera={{ position: [-0.875, 1.726, -1.826], fov: 45 }}>
+    <div style={{ width: '100vw', height: '100vh', background: '#050505', position: 'relative', overflow: 'hidden' }}>
       
-      {/* 1. CONTROLS: Add makeDefault so your CameraController can find them */}
-      <OrbitControls 
-        makeDefault 
-        enableZoom={!zoomed} // Disable manual zoom when we are focused on the desk
-        onEnd={(e) => {
-          // OPEN CONSOLE (F12) TO SEE THESE NUMBERS
-          console.log("Position (X,Y,Z):", e.target.object.position)
-          console.log("Target (LookAt):", e.target.target)
-        }}
-      />
-
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[10, 10, 5]} intensity={1} />
-      <Environment preset="city" />
-      
-      <Model onDeskClick={() => setZoomed(true)} />
-      
-      {/* 2. LOGIC: Your custom animator */}
-      <CameraController zoom={zoomed} />
-      
-    </Canvas>
-
-      {/* HTML OVERLAY MENU */}
-      <AnimatePresence>
-        {zoomed && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              background: 'rgba(0,0,0,0.8)',
-              padding: '40px',
-              borderRadius: '20px',
-              color: 'white',
-              textAlign: 'center',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.1)'
-            }}
+      {/* UI OVERLAY */}
+      <AnimatePresence mode="wait">
+        {!isStarted ? (
+          <motion.div 
+            key="intro"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, y: -100 }}
+            transition={{ duration: 1 }}
+            className="hero-overlay"
           >
-            <h2>Welcome Home</h2>
-            <p style={{marginBottom: '20px', color: '#ccc'}}>Where would you like to go?</p>
-            
-            <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
-              <button style={btnStyle} onClick={() => window.location.href = '/home'}>🏠 Home</button>
-              <button style={btnStyle} onClick={() => window.location.href = '/watch'}>📺 Watch</button>
-              <button style={btnStyle} onClick={() => window.location.href = '/shoe'}>👟 Shop</button>
-              
-              <hr style={{margin: '15px 0', borderColor: '#444'}}/>
-              
-              <button 
-                style={{...btnStyle, color: '#ffffff',background: 'transparent', border: '1px solid #666'}}
-                onClick={() => setZoomed(false)} // Go back to room view
-              >
-                ← Back to Room
-              </button>
-            </div>
+            <h1 className="title">FETCH & FIX // DIGITAL</h1>
+            <p className="subtitle">WELCOME TO THE LAB 3.0</p>
+            <button className="enter-btn" onClick={startExperience}>ENTER THE LAB</button>
           </motion.div>
-        )}
+        ) : activeProject ? (
+          // BACK BUTTON WHEN ZOOMED IN
+          <motion.div 
+            key="back-ui"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{ position: 'absolute', top: 40, left: 40, zIndex: 100 }}
+          >
+             <button className="enter-btn" onClick={resetView}>← BACK TO LAB</button>
+          </motion.div>
+        ) : null}
       </AnimatePresence>
 
-      {/* Hint UI */}
-      {!zoomed && (
-        <div style={{
-          position: 'absolute', 
-          bottom: '50px', 
-          left: '50%', 
-          transform: 'translate(-50%, 0)', 
-          color: 'black', 
-          pointerEvents: 'none',
-          opacity: 0.7
-        }}>
-          Click the desk to explore
-        </div>
-      )}
+      {/* 3D SCENE */}
+      <Canvas 
+        shadows 
+        camera={{ position: [-0.92, 18.96, 0.05], fov: 75 }}
+        gl={{ toneMapping: THREE.AgXToneMapping, toneMappingExposure: 0.6 }}
+      >
+        <Suspense fallback={null}>
+          <CameraRig 
+            introStep={introStep} 
+            activeProject={activeProject} 
+            isStarted={isStarted} 
+          />
+          
+          <ambientLight intensity={0.2} />
+          <pointLight position={[10, 10, 10]} intensity={1.5} color="#00f2ff" />
+          
+          <Model 
+            activeProject={activeProject}
+            onProjectSelect={(project) => setActiveProject(project)} 
+          />
+          
+          <Environment preset="city" />
+          <ContactShadows opacity={0.4} scale={20} blur={2.4} />
+        </Suspense>
+      </Canvas>
 
+      <style>{`
+        .hero-overlay {
+          position: absolute; z-index: 10; width: 100%; height: 100%;
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          background: radial-gradient(circle, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%);
+        }
+        .title { color: white; font-family: 'Inter', sans-serif; font-size: 4rem; letter-spacing: 15px; margin: 0; text-align: center; }
+        .subtitle { color: #00f2ff; font-family: 'monospace'; letter-spacing: 5px; margin-top: 10px; }
+        .enter-btn {
+          pointer-events: auto; margin-top: 50px; padding: 15px 40px;
+          background: none; border: 2px solid #00f2ff; color: #00f2ff;
+          font-family: 'Inter', sans-serif; font-weight: bold; cursor: pointer;
+          letter-spacing: 3px; transition: 0.3s;
+        }
+        .enter-btn:hover { background: #00f2ff; color: black; }
+      `}</style>
     </div>
   )
 }
-
-const btnStyle = {
-  padding: '12px 24px',
-  borderRadius: '8px',
-  border: 'none',
-  background: '#ffffff',
-  color: 'black',
-  fontWeight: 'bold',
-  cursor: 'pointer',
-  fontSize: '16px',
-  transition: '0.2s',
-}
-
-useGLTF.preload('/rooomtestthing.glb')
