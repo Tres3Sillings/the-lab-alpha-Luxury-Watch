@@ -13,11 +13,11 @@ function CameraRig({ isStarted, activeProject }) {
   const { scene } = useThree()
 
   useFrame((state, delta) => {
-    // 1. DEFAULT HUB VIEW (Where we land after entering)
+    // 1. DEFAULT HUB VIEW
     let p = [0.7, 2.24, 0.19]
     let t = [3.51, 1.2, 0.37]
 
-    // 2. FIND OBJECTS FOR LIVE TRACKING
+    // 2. FIND OBJECTS
     const camShoeObj = scene.getObjectByName('Cam_Shoe')
     const camWatchObj = scene.getObjectByName('Cam_Watch')
     const shoeHitBox = scene.getObjectByName('Shoe_Arcade_HitBox')
@@ -33,12 +33,12 @@ function CameraRig({ isStarted, activeProject }) {
       watchHitBox.getWorldPosition(targetLook.current)
     } 
     else if (!isStarted) {
-      // --- INTRO VIEW (High in the sky) ---
+      // INTRO VIEW
       targetPos.current.set(-0.92, 18.96, 0.05)
       targetLook.current.set(-0.92, 0, 0.05)
     } 
     else {
-      // --- HUB VIEW (Normal) ---
+      // HUB VIEW
       targetPos.current.set(...p)
       targetLook.current.set(...t)
     }
@@ -63,7 +63,7 @@ export default function Experience({ isStarted, activeProject, onProjectSelect, 
   // --- SCROLL LOGIC ---
   useEffect(() => {
     const handleScroll = (e) => {
-      if (!activeProject && isStarted) { // Only scroll if started & not inside a project
+      if (!activeProject && isStarted) {
         setRotationY((prev) => prev + e.deltaY * 0.0005)
       }
     }
@@ -71,7 +71,7 @@ export default function Experience({ isStarted, activeProject, onProjectSelect, 
     return () => window.removeEventListener('wheel', handleScroll)
   }, [activeProject, isStarted, setRotationY])
 
-  // --- DRAG LOGIC ---
+  // --- DRAG LOGIC (REVERSED) ---
   useEffect(() => {
     const canvas = gl.domElement 
     const handlePointerDown = (e) => {
@@ -83,7 +83,10 @@ export default function Experience({ isStarted, activeProject, onProjectSelect, 
     const handlePointerMove = (e) => {
       if (!isDragging.current || activeProject || !isStarted) return
       const deltaX = e.clientX - previousX.current
-      setRotationY((prev) => prev + deltaX * 0.005)
+      
+      // FIX: Changed '+' to '-' to reverse the drag direction
+      setRotationY((prev) => prev - deltaX * 0.005)
+      
       previousX.current = e.clientX
     }
     const handlePointerUp = () => {
