@@ -35,8 +35,6 @@ function ScrollHandler({ setProgress }) {
 // --- 3. MAIN COMPONENT ---
 export default function Watch() {
   const [progress, setProgress] = useState(0)
-  
-  // Mobile Detection Logic
   const [scale, setScale] = useState(30)
   const [isMobile, setIsMobile] = useState(false)
 
@@ -44,18 +42,16 @@ export default function Watch() {
     const handleResize = () => {
       const mobile = window.innerWidth < 768
       setIsMobile(mobile)
-      // Desktop: 30, Mobile: 18 (Adjust this number if it's still too big)
       setScale(mobile ? 18 : 30) 
     }
     
-    // Check immediately and on resize
     handleResize()
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
   return (
-    <div style={{ width: '100vw', height: '100vh', background: '#000' }}>
+    <div style={{ width: '100vw', height: '100dvh', background: '#000' }}>
       
       <CustomLoader />
 
@@ -65,7 +61,6 @@ export default function Watch() {
 
       <Canvas 
         shadows 
-        // Adjust FOV slightly for mobile to keep things framed well
         camera={{ position: [0, 0, 12], fov: isMobile ? 40 : 30 }}
         style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
       >
@@ -73,14 +68,18 @@ export default function Watch() {
           <Background />
           <Environment preset="city" />
           
-          {/* FIX: Increased pages from 8 -> 10 
-             This adds 2 full screen heights of "scrollable area" to the end,
-             giving the final section plenty of room to settle.
+          {/* MOBILE FIXES:
+             1. pages: Reduced to 8 on mobile (less scrolling required)
+             2. damping: Increased to 0.2 on mobile (stops "flying" / sliding on ice)
           */}
-          <ScrollControls pages={10} damping={0.04} infinite={false}>
+          <ScrollControls 
+            pages={isMobile ? 8 : 10} 
+            damping={isMobile ? 0.2 : 0.04} 
+            infinite={false}
+          >
             
             <WatchModel 
-              scale={scale} // Dynamic Scale based on screen size
+              scale={scale} 
               position={[5, -1, -5]} 
             />
             

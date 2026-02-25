@@ -13,7 +13,7 @@ export default function Home() {
   const [rotationY, setRotationY] = useState(-0.085) // Calibrated to match the first slot (Nike Lab)
 
   return (
-    <div style={{ width: '100vw', height: '100vh', background: '#050505', position: 'relative' }}>
+    <div style={{ width: '100vw', height: '100dvh', background: '#050505', position: 'relative' }}>
       
       {/* 1. UI OVERLAY */}
       <Interface 

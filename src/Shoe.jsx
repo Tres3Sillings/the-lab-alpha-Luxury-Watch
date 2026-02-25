@@ -177,7 +177,7 @@ export default function Shoe() {
   }
 
   return (
-    <div className="relative h-screen w-full bg-[#050505] text-white font-sans overflow-hidden">
+    <div className="relative h-[100dvh] w-full bg-[#050505] text-white font-sans overflow-hidden">
       
       <ShoeLoader />
       
