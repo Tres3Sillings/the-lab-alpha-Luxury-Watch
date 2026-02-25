@@ -248,18 +248,105 @@ export default function Interface({ isStarted, onStart, activeProject, onBack, r
 
       <AnimatePresence mode="wait">
         
-        {/* PHASE 1: START SCREEN */}
-        {!isStarted && (
-          <motion.div 
-            key="start-screen"
-            initial={{ opacity: 1 }} exit={{ opacity: 0, y: -50 }} transition={{ duration: 0.8 }}
-            style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%)', pointerEvents: 'auto' }}
-          >
-            <motion.h1 initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} style={{ color: 'white', fontFamily: 'Inter, sans-serif', fontSize: '4rem', letterSpacing: '10px', margin: 0, textAlign: 'center' }}>THE LAB ALPHA</motion.h1>
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 0.6 }} transition={{ delay: 0.4 }} style={{ color: '#00f2ff', fontFamily: 'monospace', letterSpacing: '5px', marginTop: '10px' }}>Version 1.0</motion.p>
-            <motion.button onClick={onStart} initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} whileHover={{ scale: 1.1, boxShadow: "0 0 25px #00f2ff", textShadow: "0 0 10px #00f2ff" }} whileTap={{ scale: 0.95 }} style={{ marginTop: '50px', padding: '15px 40px', background: 'transparent', border: '2px solid #00f2ff', color: '#00f2ff', fontFamily: 'Inter, sans-serif', fontWeight: 'bold', cursor: 'pointer', letterSpacing: '3px', textTransform: 'uppercase' }}>Enter The Lab</motion.button>
-          </motion.div>
-        )}
+{/* PHASE 1: START SCREEN */}
+{!isStarted && (
+  <motion.div 
+    key="start-screen"
+    initial={{ opacity: 0 }} // Start invisible
+    animate={{ opacity: 1 }} // Fade in once loader is gone
+    exit={{ 
+      opacity: 0, 
+      y: -100, // Slide the whole screen up as it vanishes
+      transition: { 
+        duration: 0.5, // Much faster exit
+        ease: "easeIn" 
+      } 
+    }}
+    transition={{ duration: 0.8, delay: 2.5 }} // Wait 1.5s for Loader to start fading
+    style={{ 
+      width: '100%', 
+      height: '100%', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      background: 'radial-gradient(circle, rgba(0,0,0,0) 0%, rgba(0,0,0,0.9) 100%)', 
+      pointerEvents: 'auto' 
+    }}
+  >
+    {/* TITLE: Wait longer to ensure Loader is 100% gone */}
+    <motion.h1 
+      initial={{ y: -120, opacity: 0 }} 
+      animate={{ y: 0, opacity: 1 }} 
+      transition={{ 
+        duration: 1.2, 
+        delay: 2.5, // Increased delay to beat the Loader
+        ease: [0.22, 1, 0.36, 1] 
+      }}
+      style={{ 
+        color: 'white', 
+        fontFamily: 'Inter, sans-serif', 
+        fontSize: 'clamp(2rem, 8vw, 4rem)', 
+        letterSpacing: '10px', 
+        margin: 0, 
+        textAlign: 'center',
+        textTransform: 'uppercase'
+      }}
+    >
+        THE LAB ALPHA
+    </motion.h1>
+
+    {/* VERSION TAG */}
+    <motion.p
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 0.4 }} 
+      transition={{ duration: 1, delay: 0.8 }} // Staggered after Title
+      style={{ 
+        color: '#00f2ff', 
+        fontFamily: 'monospace', 
+        letterSpacing: '5px', 
+        marginTop: '10px',
+        fontSize: '0.8rem' 
+      }}
+    >
+      Version 1.0
+    </motion.p>
+
+    {/* BUTTON */}
+    <motion.button 
+      onClick={onStart}
+      initial={{ y: 60, opacity: 0 }} 
+      animate={{ y: 0, opacity: 1 }} 
+      transition={{ 
+        duration: 1, 
+        delay: 2.7, // Staggered slightly after Title
+        ease: [0.22, 1, 0.36, 1] 
+      }}
+      whileHover={{ 
+        scale: 1.05, 
+        boxShadow: "0 0 30px rgba(0,242,255,0.4)", 
+        borderColor: "#fff",
+        color: "#fff"
+      }}
+      whileTap={{ scale: 0.95 }}
+      style={{ 
+        marginTop: '60px', 
+        padding: '15px 45px', 
+        background: 'transparent', 
+        border: '1px solid #00f2ff', 
+        color: '#00f2ff', 
+        fontFamily: 'Inter, sans-serif', 
+        fontWeight: 'bold', 
+        cursor: 'pointer', 
+        letterSpacing: '4px', 
+        textTransform: 'uppercase',
+        transition: 'all 0.3s ease'
+      }}
+    >
+      Enter The Lab
+    </motion.button>
+  </motion.div>
+)}
 
         {/* PHASE 2: ACTIVE PROJECT UI (Responsive) */}
         {activeProject && (

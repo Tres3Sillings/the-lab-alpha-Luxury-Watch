@@ -222,7 +222,7 @@ export default function Shoe() {
 
          {/* Brand Logo (Top Right) */}
          <div className="text-right pointer-events-auto">
-            <Link to="/home" className="text-[18px] font-bold tracking-[0.2em] uppercase text-white/40 hover:text-white transition-colors block mb-1">
+            <Link to="/home" state={{ from: 'shoe' }} className="text-[18px] font-bold tracking-[0.2em] uppercase text-white/40 hover:text-white transition-colors block mb-1">
             EXIT
             </Link>
             <h1 className="text-xl font-black italic uppercase tracking-tighter leading-none text-zinc-700">
