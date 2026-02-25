@@ -1,104 +1,137 @@
-import React from 'react'
-import { useFrame } from '@react-three/fiber'
-import { useGLTF } from '@react-three/drei' // <--- Import this here!
+import React, { useState, useEffect, useRef } from 'react'
+import { useFrame, useThree } from '@react-three/fiber' // <--- Added useThree
+import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { easing } from 'maath'
-import { Model } from '../Models/TheLabHub_V2' // Adjust path if needed
+import { Model } from '../Models/TheLabHub_V2'
 
-function CameraRig({ isStarted, activeProject, nodes }) {
-  const lookAtVec = new THREE.Vector3()
-  const q = new THREE.Quaternion()
-  const m = new THREE.Matrix4()
-
-  // --- DYNAMIC CONFIGURATION ---
-  // We build this using the nodes passed in props
-  const projectConfig = {
-  shoe: { 
-    // 1. POSITION: Grab the exact spot from Blender
-    // We use a small offset (+0.5 on Y) if it feels too low/inside the floor
-    position: nodes.Cam_Shoe ? [
-      nodes.Cam_Shoe.position.x + 1.2,
-      nodes.Cam_Shoe.position.y - 0.2, // + 0.2 if you need it higher
-      nodes.Cam_Shoe.position.z + -0.03
-    ] : [4.5, 1.7, 1.5],
-
-    // 2. ROTATION: IGNORE Blender's rotation. Use a target instead.
-    // quaternion: nodes.Cam_Shoe?.quaternion, // <--- COMMENT THIS OUT
-
-    // 3. TARGET: Look at the machine's specific coordinates
-    target: [5.43, 1.6, 0.02] 
-  },
-  watch: { 
-    position: nodes.Cam_Watch ? [
-      nodes.Cam_Watch.position.x + .2,
-      nodes.Cam_Watch.position.y - 0.2, //
-        nodes.Cam_Watch.position.z + 0.3
-    ] : [3.8, 1.6, 3.85],
-    
-    // quaternion: nodes.Cam_Watch?.quaternion, // <--- COMMENT THIS OUT
-    
-    target: [3.8, 1.6, 3.85]
-  }
-}
+function CameraRig({ isStarted, activeProject }) {
+  const targetPos = useRef(new THREE.Vector3())
+  const targetLook = useRef(new THREE.Vector3())
+  const targetQuat = useRef(new THREE.Quaternion())
+  const m = useRef(new THREE.Matrix4())
+  
+  // 1. GET THE SCENE TO FIND OBJECTS
+  const { scene } = useThree()
 
   useFrame((state, delta) => {
-    // 1. SETUP DEFAULTS (Hub View)
-    let targetPos = [0.7, 2.24, 0.19]
-    let targetLook = [3.51, 1.2, 0.37]
-    let targetQuat = null
+    let p = [0.7, 2.24, 0.19]
+    let t = [3.51, 1.2, 0.37]
 
-    // 2. DETERMINE TARGET
-    if (activeProject && projectConfig[activeProject]) {
-      const config = projectConfig[activeProject]
-      targetPos = config.position
-      
-      if (config.quaternion) {
-        targetQuat = config.quaternion
-      } else {
-        targetLook = config.target
-      }
+    // 2. FIND THE ACTUAL SPINNING OBJECTS
+    // We look for them by name because they are inside the rotating group
+    const camShoeObj = scene.getObjectByName('Cam_Shoe')
+    const camWatchObj = scene.getObjectByName('Cam_Watch')
+    const shoeHitBox = scene.getObjectByName('Shoe_Arcade_HitBox')
+    const watchHitBox = scene.getObjectByName('Watch_Arcade_HitBox')
+
+    // 3. LIVE TRACKING
+    if (activeProject === 'shoe' && camShoeObj && shoeHitBox) {
+      camShoeObj.getWorldPosition(targetPos.current)
+      shoeHitBox.getWorldPosition(targetLook.current)
+    } 
+    else if (activeProject === 'watch' && camWatchObj && watchHitBox) {
+      camWatchObj.getWorldPosition(targetPos.current)
+      watchHitBox.getWorldPosition(targetLook.current)
     } 
     else if (!isStarted) {
-       targetPos = [-0.92, 18.96, 0.05]
-       targetLook = [-0.92, 0, 0.05] 
-    }
-
-    // 3. MOVE CAMERA
-    easing.damp3(state.camera.position, targetPos, 0.4, delta)
-
-    // 4. ROTATE CAMERA
-    if (targetQuat) {
-      q.copy(targetQuat)
+      targetPos.current.set(-0.92, 18.96, 0.05)
+      targetLook.current.set(-0.92, 0, 0.05)
     } else {
-      lookAtVec.set(...targetLook)
-      m.lookAt(state.camera.position, lookAtVec, state.camera.up)
-      q.setFromRotationMatrix(m)
+      targetPos.current.set(...p)
+      targetLook.current.set(...t)
     }
-    easing.dampQ(state.camera.quaternion, q, 0.4, delta)
+
+    // 4. SMOOTH ANIMATION
+    m.current.lookAt(targetPos.current, targetLook.current, state.camera.up)
+    targetQuat.current.setFromRotationMatrix(m.current)
+
+    easing.damp3(state.camera.position, targetPos.current, 0.4, delta)
+    easing.dampQ(state.camera.quaternion, targetQuat.current, 0.4, delta)
   })
 
   return null
 }
 
 export default function Experience({ isStarted, activeProject, onProjectSelect }) {
-  // Load the file HERE to get the camera nodes
-  const { nodes } = useGLTF('/TheLabHub_V2-transformed.glb')
+  const [rotationY, setRotationY] = useState(0)
+  const groupRef = useRef()
+  
+  // DRAG STATE
+  const isDragging = useRef(false)
+  const previousX = useRef(0)
+  
+  // Access the canvas element to attach events
+  const { gl } = useThree()
+
+  // --- 1. SCROLL LOGIC ---
+  useEffect(() => {
+    const handleScroll = (e) => {
+      if (!activeProject) {
+        setRotationY((prev) => prev + e.deltaY * 0.0005)
+      }
+    }
+    window.addEventListener('wheel', handleScroll)
+    return () => window.removeEventListener('wheel', handleScroll)
+  }, [activeProject])
+
+  // --- 2. DRAG LOGIC (NEW) ---
+  useEffect(() => {
+    const canvas = gl.domElement // Only listen for clicks on the 3D canvas
+
+    const handlePointerDown = (e) => {
+      if (activeProject) return // Don't rotate if focused on a project
+      isDragging.current = true
+      previousX.current = e.clientX
+      document.body.style.cursor = 'grabbing' // UX Polish
+    }
+
+    const handlePointerMove = (e) => {
+      if (!isDragging.current || activeProject) return
+      
+      // Calculate how far we moved
+      const deltaX = e.clientX - previousX.current
+      
+      // Update Rotation (Adjust 0.005 to make it faster/slower)
+      setRotationY((prev) => prev + deltaX * 0.005)
+      
+      previousX.current = e.clientX
+    }
+
+    const handlePointerUp = () => {
+      isDragging.current = false
+      document.body.style.cursor = 'auto'
+    }
+
+    // Attach 'Down' to Canvas (so UI buttons don't trigger rotation)
+    canvas.addEventListener('pointerdown', handlePointerDown)
+    // Attach 'Move/Up' to Window (so you can drag off-screen without losing it)
+    window.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointerup', handlePointerUp)
+
+    return () => {
+      canvas.removeEventListener('pointerdown', handlePointerDown)
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerup', handlePointerUp)
+    }
+  }, [activeProject, gl])
+
+  useFrame((state, delta) => {
+    if (groupRef.current) {
+      easing.dampE(groupRef.current.rotation, [0, rotationY, 0], 0.25, delta)
+    }
+  })
 
   return (
     <>
-      <CameraRig 
-        isStarted={isStarted} 
-        activeProject={activeProject} 
-        nodes={nodes} // Pass the loaded nodes to the Rig
-      />
+      <CameraRig isStarted={isStarted} activeProject={activeProject} />
       
       <ambientLight intensity={0.2} />
       <pointLight position={[10, 10, 10]} intensity={1.5} color="#00f2ff" />
 
-      <Model 
-        onProjectSelect={onProjectSelect} 
-        activeProject={activeProject} 
-      />
+      <group ref={groupRef}>
+        <Model onProjectSelect={onProjectSelect} activeProject={activeProject} />
+      </group>
     </>
   )
 }
