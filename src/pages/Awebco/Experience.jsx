@@ -1,18 +1,19 @@
-import React, { Suspense, useRef } from 'react'
+import React, { Suspense, useRef, useMemo } from 'react' // Added useMemo here
 import { Canvas, useFrame } from '@react-three/fiber'
 import { ScrollControls, Scroll, useScroll, Float, Stars, Environment } from '@react-three/drei'
 import * as THREE from 'three'
 
 import Rocket from './components/Rocket'
 import Planet_01 from './components/Planet_01'
+import Asteroid from './components/Asteroid' // Ensure this is imported
 import Overlay from './components/Overlay'
 
 const CONFIG = {
   rocket: {
-    position: [0, -1.2, -5], // Relative to camera rig
+    position: [0, -1.2, -5],
     scale: 1,
-    floatIntensity: 0.5, 
-    rotationIntensity: 0.2 
+    floatIntensity: 1.8, 
+    rotationIntensity: 0.5 
   },
   destinations: [
     { id: "SABREBATS", entry: 0.15, exit: 0.45, startX: -25, endX: -8, yPos: -26 },
@@ -26,26 +27,37 @@ function Scene() {
   const rigRef = useRef() 
   const p1 = useRef(); const p2 = useRef(); const p3 = useRef();
 
+  // 1. GENERATE ASTEROIDS (Outside useFrame!)
+  const asteroidData = useMemo(() => {
+    return Array.from({ length: 60 }, () => ({
+      position: [
+        (Math.random() - 0.5) * 50, 
+        (Math.random() - 0.5) * 200, // Spread across the whole flight
+        (Math.random() - 0.5) * 30 - 15
+      ],
+      scale: Math.random() * 0.5 + 0.2,
+      rotation: [Math.random() * Math.PI, Math.random() * Math.PI, 0]
+    }))
+  }, [])
+
   useFrame((state, delta) => {
     const offset = scroll.offset
     
-    // 1. VERTICAL FLIGHT: Move camera Y down so world appears to move UP
+    // VERTICAL FLIGHT
     const targetY = -offset * 100 
     state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, 0.1)
     
     if (rigRef.current) {
-      // Lock the rig (rocket) to the camera's Y position
       rigRef.current.position.y = state.camera.position.y
     }
 
-    // 2. PLANET SLIDE LOGIC (Horizontal slide while flying vertically)
+    // PLANET SLIDE LOGIC
     const animatePlanet = (ref, config) => {
       if (ref.current) {
         const entryProg = THREE.MathUtils.smoothstep(offset, config.entry, config.entry + 0.1)
         const exitProg = THREE.MathUtils.smoothstep(offset, config.exit, config.exit + 0.1)
         const currentX = THREE.MathUtils.lerp(config.startX, config.endX, entryProg - exitProg)
         
-        // Planet stays at a fixed Y in the world, camera flies past it
         ref.current.position.x = currentX
         ref.current.rotation.y += delta * 0.3
       }
@@ -58,16 +70,34 @@ function Scene() {
 
   return (
     <>
+      {/* ROCKET RIG */}
       <group ref={rigRef}>
-        <Float speed={1.5} rotationIntensity={CONFIG.rocket.rotationIntensity} floatIntensity={CONFIG.rocket.floatIntensity}> 
-          <Rocket scale={CONFIG.rocket.scale} position={CONFIG.rocket.position} />
+        <Float 
+          speed={4} 
+          rotationIntensity={CONFIG.rocket.rotationIntensity} 
+          floatIntensity={CONFIG.rocket.floatIntensity}
+        > 
+          <Rocket 
+            scale={CONFIG.rocket.scale} 
+            position={CONFIG.rocket.position} 
+          />
         </Float>
       </group>
 
-      {/* Planets positioned at different Y heights to "fly past" */}
+      {/* PLANETS */}
       <Planet_01 ref={p1} position={[0, CONFIG.destinations[0].yPos, -15]} scale={5} />
       <Planet_01 ref={p2} position={[0, CONFIG.destinations[1].yPos, -15]} scale={5} />
       <Planet_01 ref={p3} position={[0, CONFIG.destinations[2].yPos, -15]} scale={5} />
+
+      {/* ASTEROID FIELD */}
+      {asteroidData.map((data, i) => (
+        <Asteroid 
+          key={i} 
+          position={data.position} 
+          scale={data.scale} 
+          rotation={data.rotation} 
+        />
+      ))}
 
       <Stars radius={100} depth={100} count={7000} factor={4} saturation={0} fade speed={2} />
     </>
