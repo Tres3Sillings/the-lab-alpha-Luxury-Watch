@@ -3,9 +3,9 @@ import { Canvas } from '@react-three/fiber'
 import { Environment, ContactShadows } from '@react-three/drei'
 import { useLocation } from 'react-router-dom' // <--- IMPORT THIS
 import * as THREE from 'three'
-import Experience from './components/Home/Experience'
-import Interface from './components/Home/Interface'
-import Loader from './components/Home/Loader'
+import Experience from './pages/Home/Experience.jsx'
+import Interface from './pages/Home/components/Interface'
+import Loader from './pages/Home/components/Loader.jsx'
 
 export default function Home() {
   const location = useLocation() // <--- ACCESS THE ROUTER STATE
