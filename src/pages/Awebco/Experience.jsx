@@ -1,79 +1,76 @@
-import React, { Suspense, useRef, useMemo } from 'react'
+import React, { Suspense, useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { ScrollControls, Scroll, useScroll, Float, Stars, Environment } from '@react-three/drei'
 import * as THREE from 'three'
 
-// Importing your generated components
 import Rocket from './components/Rocket'
 import Planet_01 from './components/Planet_01'
-import Asteroid from './components/Asteroid'
 import Overlay from './components/Overlay'
+
+const CONFIG = {
+  rocket: {
+    position: [0, -1.2, -5], // Relative to camera rig
+    scale: 1,
+    floatIntensity: 0.5, 
+    rotationIntensity: 0.2 
+  },
+  destinations: [
+    { id: "SABREBATS", entry: 0.15, exit: 0.45, startX: -25, endX: -8, yPos: -26 },
+    { id: "ATLAS", entry: 0.40, exit: 0.60, startX: 20, endX: 8, yPos: -50 },
+    { id: "SENTRY", entry: 0.65, exit: 1, startX: -20, endX: -8, yPos: -75 }
+  ]
+}
 
 function Scene() {
   const scroll = useScroll()
-  const rocketRef = useRef()
-  const groupRef = useRef()
+  const rigRef = useRef() 
+  const p1 = useRef(); const p2 = useRef(); const p3 = useRef();
 
-  // 1. Create a randomized asteroid field based on your "In Transit" sketch
-  const asteroids = useMemo(() => {
-    return Array.from({ length: 25 }, () => ({
-      position: [
-        (Math.random() - 0.5) * 30,
-        (Math.random() - 0.5) * 30,
-        (Math.random() - 0.5) * 50 - 10 // Spread them along the Z-axis
-      ],
-      scale: Math.random() * 0.4 + 0.1,
-      rotation: [Math.random() * Math.PI, Math.random() * Math.PI, 0],
-      speed: Math.random() * 0.01 // Individual spin speed
-    }))
-  }, [])
-
- useFrame((state, delta) => {
-  const offset = scroll.offset // 0 to 1 scroll progress
-
-  // --- LANDING LOGIC (0.0 to 0.4 scroll) ---
-  // We want the rocket to be "landed" by the time we hit 30% scroll
-  const landProg = Math.min(offset * 3.33, 1) 
-
-  if (rocketRef.current) {
-    // 1. Position: Move from center [0,0,0] to Planet surface [5,-2,-15]
-    // Values adjusted to match your Planet_01 position
-    rocketRef.current.position.x = THREE.MathUtils.lerp(0, 4.5, landProg)
-    rocketRef.current.position.y = THREE.MathUtils.lerp(0, -1.2, landProg)
-    rocketRef.current.position.z = THREE.MathUtils.lerp(0, -13.8, landProg)
-
-    // 2. Rotation: Tilt the rocket to "sit" on the sphere's curve
-    rocketRef.current.rotation.x = THREE.MathUtils.lerp(0, -Math.PI / 6, landProg)
+  useFrame((state, delta) => {
+    const offset = scroll.offset
     
-    // --- TRANSITION LOGIC (0.4 to 0.7 scroll) ---
-    // The "Quantum Jump" turn from your sketch
-    const jumpProg = Math.max(0, (offset - 0.4) * 5)
-    const targetJumpRotation = offset > 0.4 ? Math.PI / 2 : 0
-    rocketRef.current.rotation.y = THREE.MathUtils.lerp(rocketRef.current.rotation.y, targetJumpRotation, 0.1)
-  }
+    // 1. VERTICAL FLIGHT: Move camera Y down so world appears to move UP
+    const targetY = -offset * 100 
+    state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, 0.1)
+    
+    if (rigRef.current) {
+      // Lock the rig (rocket) to the camera's Y position
+      rigRef.current.position.y = state.camera.position.y
+    }
 
-  // 3. Camera Follow: Keep the rocket in view
-  state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, 10 - offset * 50, 0.1)
-})
+    // 2. PLANET SLIDE LOGIC (Horizontal slide while flying vertically)
+    const animatePlanet = (ref, config) => {
+      if (ref.current) {
+        const entryProg = THREE.MathUtils.smoothstep(offset, config.entry, config.entry + 0.1)
+        const exitProg = THREE.MathUtils.smoothstep(offset, config.exit, config.exit + 0.1)
+        const currentX = THREE.MathUtils.lerp(config.startX, config.endX, entryProg - exitProg)
+        
+        // Planet stays at a fixed Y in the world, camera flies past it
+        ref.current.position.x = currentX
+        ref.current.rotation.y += delta * 0.3
+      }
+    }
+
+    animatePlanet(p1, CONFIG.destinations[0]);
+    animatePlanet(p2, CONFIG.destinations[1]);
+    animatePlanet(p3, CONFIG.destinations[2]);
+  })
 
   return (
-    <group ref={groupRef}>
-      {/* The Hero Rocket - Fixed relative to camera view */}
-      <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
-        <Rocket ref={rocketRef} scale={0.5} position={[0, -1, 0]} />
-      </Float>
+    <>
+      <group ref={rigRef}>
+        <Float speed={1.5} rotationIntensity={CONFIG.rocket.rotationIntensity} floatIntensity={CONFIG.rocket.floatIntensity}> 
+          <Rocket scale={CONFIG.rocket.scale} position={CONFIG.rocket.position} />
+        </Float>
+      </group>
 
-      {/* Destination 1: The Tech-Camo Planet (Build) */}
-      <Planet_01 position={[5, -2, -15]} scale={2.5} />
+      {/* Planets positioned at different Y heights to "fly past" */}
+      <Planet_01 ref={p1} position={[0, CONFIG.destinations[0].yPos, -15]} scale={5} />
+      <Planet_01 ref={p2} position={[0, CONFIG.destinations[1].yPos, -15]} scale={5} />
+      <Planet_01 ref={p3} position={[0, CONFIG.destinations[2].yPos, -15]} scale={5} />
 
-      {/* The Asteroid Field */}
-      {asteroids.map((props, i) => (
-        <Asteroid key={i} {...props} />
-      ))}
-
-      {/* Global Environment */}
-      <Stars radius={100} depth={50} count={7000} factor={4} saturation={0} fade speed={1} />
-    </group>
+      <Stars radius={100} depth={100} count={7000} factor={4} saturation={0} fade speed={2} />
+    </>
   )
 }
 
@@ -81,18 +78,11 @@ export default function Experience() {
   return (
     <div style={{ width: '100vw', height: '100vh', background: '#000814' }}>
       <Canvas shadows camera={{ position: [0, 0, 10], fov: 35 }}>
-        {/* AWEBCO Brand Lighting: Navy and White with Red Accents */}
-        <color attach="background" args={['#000814']} />
         <Environment preset="city" />
-        <ambientLight intensity={0.4} />
-        <pointLight position={[10, 10, 10]} intensity={1.5} color="#E9F4FF" />
-        <spotLight position={[-10, 10, 10]} angle={0.15} penumbra={1} intensity={2} color="#CC3333" />
-
+        <ambientLight intensity={0.5} />
         <Suspense fallback={null}>
-          <ScrollControls pages={4} damping={0.2}>
+          <ScrollControls pages={5} damping={0.2}>
             <Scene />
-            
-            {/* 2D UI Layer for project titles and buttons */}
             <Scroll html>
               <Overlay />
             </Scroll>

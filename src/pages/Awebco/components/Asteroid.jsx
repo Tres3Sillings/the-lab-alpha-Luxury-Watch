@@ -15,6 +15,6 @@ export function Model(props) {
     </group>
   )
 }
-export default Model
+export default Model;
 
 useGLTF.preload('/Asteroid-transformed.glb')
