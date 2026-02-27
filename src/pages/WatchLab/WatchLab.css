@@ -1,0 +1,50 @@
+/* WATCH LOADER */
+.loader-watch-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #000; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000; 
+  transition: opacity 0.5s ease-out; 
+}
+
+.clock-face {
+  width: 60px;
+  height: 60px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  position: relative;
+}
+
+.clock-hand {
+  width: 2px;
+  height: 25px;
+  background: #fff;
+  position: absolute;
+  top: 5px; 
+  left: 50%;
+  transform-origin: bottom center; 
+  transform: translateX(-50%);
+  animation: tick-tock 2s steps(60) infinite; 
+}
+
+.clock-center {
+  width: 4px;
+  height: 4px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes tick-tock {
+  0% { transform: translateX(-50%) rotate(0deg); }
+  100% { transform: translateX(-50%) rotate(360deg); }
+}

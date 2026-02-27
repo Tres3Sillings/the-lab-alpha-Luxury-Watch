@@ -1,0 +1,68 @@
+/* src/pages/Awebco/Awebco.css */
+
+.project-section { transition: opacity 0.5s ease-in-out; }
+
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(204, 51, 51, 0.4); }
+  70% { box-shadow: 0 0 0 15px rgba(204, 51, 51, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(204, 51, 51, 0); }
+}
+
+.animate-cta {
+  background-color: #CC3333;
+  animation: pulse-red 2s infinite;
+  border: none;
+  border-radius: 2px;
+  padding: 12px 30px;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  pointer-events: auto;
+}
+
+/* THE GALLERY PORTAL CLASS */
+.project-portal {
+  position: fixed;
+  top: 50%;
+  left: 150%; 
+  transform: translate(-50%, -50%);
+  
+  /* --- INCREASED DESKTOP SIZE --- */
+  width: 80vw;          /* Increased from 65vw to 80vw for a massive showcase */
+  aspect-ratio: 16 / 9; /* Automatically calculates the perfect height */
+  height: auto;         
+  max-height: 85vh;     /* Keeps the top and bottom from clipping off the monitor */
+  
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  
+  transition: 
+    left 1.2s cubic-bezier(0.16, 1, 0.3, 1), 
+    width 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+    aspect-ratio 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+    opacity 0.6s ease;
+}
+
+/* THE MOBILE TRIGGER */
+.project-portal.is-mobile {
+  width: 350px !important;  
+  /* Flips the ratio to a standard vertical phone shape */
+  aspect-ratio: 9 / 16 !important; 
+  height: auto !important; 
+}
+
+/* INNER IFRAME STYLING */
+.project-portal iframe {
+  width: 100%;
+  height: 100%;
+  border: 6px solid #CC3333;
+  border-radius: 16px;
+  background: #000;
+  transition: border-radius 0.8s ease;
+}
+
+/* Round the corners when it hits mobile size */
+.project-portal.is-mobile iframe {
+  border-radius: 40px; 
+}

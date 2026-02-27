@@ -1,144 +1,96 @@
-import React from 'react'
+import React, { useRef } from 'react'
+import { useScroll } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
+import * as THREE from 'three'
+import './Awebco.css'
+import { PROJECTS } from '../Experience' // Import the configuration array
 
-const ProjectSection = ({ title, url, specs, align = "right" }) => {
-  const isMobile = window.innerWidth < 768;
-
-  return (
-    <section style={{
-      height: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: isMobile ? 'center' : (align === "right" ? "flex-end" : "flex-start"),
-      padding: '0 5%',
-      // Pointer-events: none on the section ensures we can still grab the 3D scene 
-      // in the empty space between the HUD and the planets
-      pointerEvents: 'none',
-    }}>
-      <div 
-        style={{
-          width: isMobile ? '95%' : '650px',
-          background: 'rgba(0, 20, 40, 0.85)',
-          backdropFilter: 'blur(20px)',
-          borderLeft: align === "right" ? 'none' : '4px solid #CC3333',
-          borderRight: align === "right" ? '4px solid #CC3333' : 'none',
-          padding: isMobile ? '25px' : '40px',
-          textAlign: align,
-          // Pointer-events: all allows the user to click buttons and scroll the iframe
-          pointerEvents: 'all',
-          boxShadow: '0 25px 60px rgba(0,0,0,0.9)',
-          position: 'relative',
-          borderRadius: '2px',
-          border: '1px solid rgba(255,255,255,0.05)'
-        }}
-      >
-        <h3 style={{ color: '#CC3333', letterSpacing: '6px', margin: 0, fontSize: '0.7rem', fontWeight: 'bold' }}>
-          INTEL_NODE_v.2026
-        </h3>
-        <h2 style={{ color: 'white', fontSize: isMobile ? '2.2rem' : '4rem', margin: '10px 0', fontWeight: '900' }}>
-          {title}
-        </h2>
-        
-        {/* IMPROVED IFRAME VIEWPORT */}
-        <div style={{ 
-          width: '100%', 
-          height: isMobile ? '280px' : '350px', 
-          background: '#000', 
-          margin: '25px 0', 
-          overflow: 'hidden', 
-          border: '1px solid rgba(255,255,255,0.15)',
-          position: 'relative',
-          borderRadius: '4px'
-        }}>
-          {/* Note: For the iframe to be truly interactable, we remove 'pointer-events: none'.
-            However, this means scrolling over the iframe will scroll the website INSIDE, 
-            not your main page. Users must scroll on the dark background to continue the flight.
-          */}
-          <iframe 
-            src={url} 
-            style={{ 
-              width: isMobile ? '1200px' : '1920px', 
-              height: isMobile ? '1600px' : '1080px', 
-              transform: `scale(${isMobile ? 0.23 : 0.33})`, 
-              transformOrigin: '0 0', 
-              border: 'none',
-              background: 'white'
-            }} 
-            title={title} 
-          />
-        </div>
-
-        <div style={{ display: 'flex', gap: '15px', flexDirection: isMobile ? 'column' : 'row' }}>
-          <button 
-            className="animate-cta" 
-            onClick={() => window.open(url, '_blank')}
-            style={{ flex: 1, fontWeight: 'bold' }}
-          >
-            OPEN FULL SITE
-          </button>
-        </div>
-
-        <div style={{ 
-          color: '#8db9e2', 
-          fontSize: '0.85rem', 
-          textAlign: 'left', 
-          borderTop: '1px solid rgba(255,255,255,0.1)', 
-          paddingTop: '20px',
-          marginTop: '25px'
-        }}>
-          {specs.map((spec, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ color: '#CC3333', marginRight: '12px' }}>▶</span>
-              <span style={{ fontFamily: 'monospace', opacity: 0.9 }}>{spec}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
+// Array holding the text data for each project
+const PROJECT_TEXT = [
+  { title: 'ATLAS TOTAL HOME', features: ['+ 3D WEB DESIGN', '+ REACT INTEGRATION', '+ CUSTOM BRANDING'] },
+  { title: 'VILLAGE OF TILTON', features: ['+ CIVIC PORTAL', '+ CMS INTEGRATION', '+ ACCESSIBILITY'] },
+  { title: 'FETCH & FIX DIGITAL', features: ['+ AGENCY BRANDING', '+ SEO OPTIMIZATION', '+ LEAD GENERATION'] }
+]
 
 export default function Overlay() {
-  const isMobile = window.innerWidth < 768;
+  const scroll = useScroll()
+  const heroRef = useRef()
+  
+  // We use an array of refs to control the 3 different text panels
+  const panelRefs = useRef([])
+
+  useFrame(() => {
+    const offset = scroll.offset
+
+    // 1. Hero Text Fade
+    if (heroRef.current) {
+      heroRef.current.style.opacity = 1 - THREE.MathUtils.smoothstep(offset, 0.1, 0.25)
+      heroRef.current.style.transform = `translate(-50%, ${-50 - offset * 50}%)`
+    }
+
+    // 2. Map through text panels and apply slide logic
+    PROJECTS.forEach((proj, index) => {
+      const panel = panelRefs.current[index]
+      if (panel) {
+        const isActive = offset >= proj.start && offset <= proj.end
+        panel.style.opacity = isActive ? 1 : 0
+        
+        // Slide text in from Left (-50%), stop at Left Edge (10%), exit Left (-50%)
+        let textSlide = '-50%' 
+        if (isActive) textSlide = '8%' 
+        
+        panel.style.left = textSlide
+      }
+    })
+  })
 
   return (
-    <div style={{ width: '100vw', fontFamily: '"Courier New", Courier, monospace', color: 'white' }}>
-      {/* HERO SECTION */}
-      <section style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 10%' }}>
-        <h1 style={{ fontSize: isMobile ? '4.5rem' : '10rem', color: 'white', margin: 0, fontWeight: '900', lineHeight: 0.9 }}>
-          AWEBCO
-        </h1>
-        <div style={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
-          <div style={{ width: isMobile ? '30px' : '60px', height: '3px', background: '#CC3333', marginRight: '20px' }} />
-          <p style={{ color: '#CC3333', letterSpacing: isMobile ? '4px' : '12px', fontSize: isMobile ? '1rem' : '1.5rem', margin: 0, fontWeight: 'bold' }}>
-            EST. 2026 // ILLINOIS
-          </p>
-        </div>
-      </section>
+    <div style={{ width: '100vw', height: '800vh', position: 'relative' }}>
+      
+      {/* HERO TEXT */}
+      <div 
+        ref={heroRef}
+        style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', zIndex: 1000 }}
+      >
+        <h1 className="font-heading" style={{ fontSize: '8vw', margin: 0 }}>AWEBCO</h1>
+        <p className="font-mono" style={{ fontSize: '1.2vw', letterSpacing: '0.5em', color: '#CC3333' }}>DIGITAL SOLUTIONS</p>
+      </div>
 
-      {/* PROJECT NODES */}
-      <ProjectSection 
-        title="SABREBATS" 
-        url="https://www.sabrebats.com/" 
-        align="right" 
-        specs={["React Deployment", "3D Asset Management", "Custom UI Architecture"]} 
-      />
-      
-      <ProjectSection 
-        title="ATLAS" 
-        url="https://atlastotalhome.com/" 
-        align="left" 
-        specs={["Lead Generation Hub", "High-Performance SEO", "Conversion Optimization"]} 
-      />
-      
-      <ProjectSection 
-        title="SENTRY" 
-        url="https://sentryroofing.com/" 
-        align="right" 
-        specs={["Industrial SEO Strategy", "Legacy Brand Refresh", "Scalable Performance"]} 
-      />
-      
-      {/* Spacer for final scroll clearance */}
-      <section style={{ height: '50vh' }} />
+      {/* RENDER THE 3 FEATURE PANELS */}
+      {PROJECTS.map((proj, index) => (
+        <div 
+          key={proj.id}
+          ref={(el) => (panelRefs.current[index] = el)}
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '-50%', // Starts hidden on the left
+            transform: 'translateY(-50%)',
+            width: '25vw',
+            zIndex: 1001,
+            transition: 'all 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease'
+          }}
+        >
+          <div className="project-section" style={{ background: 'rgba(5, 5, 5, 0.95)', padding: '30px', borderLeft: '4px solid #CC3333', borderRadius: '8px' }}>
+            <h2 className="font-heading" style={{ fontSize: '2vw', marginBottom: '10px' }}>
+              {PROJECT_TEXT[index].title}
+            </h2>
+            <ul className="font-mono" style={{ listStyle: 'none', padding: 0, color: '#aaa', lineHeight: '2' }}>
+              {PROJECT_TEXT[index].features.map((feat, i) => (
+                <li key={i}>{feat}</li>
+              ))}
+            </ul>
+            <button 
+              className="animate-cta" 
+              style={{ marginTop: '20px' }}
+              onClick={() => window.open(proj.url, '_blank')}
+            >
+              VISIT LIVE SITE
+            </button>
+          </div>
+        </div>
+      ))}
+
     </div>
   )
 }

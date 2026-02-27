@@ -4,6 +4,7 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { useGLTF, Environment, ContactShadows, OrbitControls, useProgress } from '@react-three/drei'
 import { motion, AnimatePresence } from 'framer-motion'
 import * as THREE from 'three'
+import './ShoeLab.css'
 
 // --- 1. RESTORED SWOOSH LOADER ---
 function ShoeLoader() {

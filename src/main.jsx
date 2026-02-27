@@ -5,7 +5,7 @@ import './index.css'
 import Watch from './pages/WatchLab/Watch.jsx' // Directly importing the Experience
 import Home from './Home.jsx'
 import Shoe from './pages/ShoeLab/Shoe.jsx'
-import Sword from './Sword.jsx' // Importing the Sword Page/Builder
+import Sword from './pages/Forge/Sword.jsx' // Importing the Sword Page/Builder
 import Awebco from './pages/Awebco/Experience.jsx' // Importing the Awebco Page/Builder
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet"></link>
 

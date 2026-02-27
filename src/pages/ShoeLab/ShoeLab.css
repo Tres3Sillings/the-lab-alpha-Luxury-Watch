@@ -1,0 +1,36 @@
+/* SHOE LOADING SCREEN */
+.loader-shoe-container {
+  position: fixed;
+  inset: 0;
+  background: #050505;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.5s ease-out;
+  pointer-events: none;
+}
+
+.nike-swoosh-path {
+  fill: transparent; 
+  stroke: #fff;
+  stroke-width: 2; 
+  stroke-dasharray: 3000; 
+  stroke-dashoffset: 3000;
+  animation: drawNike 2.5s ease-in-out forwards; 
+}
+
+@keyframes drawNike {
+  0% {
+    stroke-dashoffset: 3000;
+    fill: transparent;
+  }
+  60% {
+    stroke-dashoffset: 0;
+    fill: transparent;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    fill: #fff; 
+  }
+}

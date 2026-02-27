@@ -2,19 +2,16 @@
 
 /* 1. IMPORT THE FONTS */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
 
 :root {
   /* 2. UPDATE DEFAULT FONT STACK */
-  /* We keep Space Grotesk as default for headings/UI */
   font-family: 'Space Grotesk', system-ui, sans-serif; 
-  
-  /* Standard settings */
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #050505; /* Darker, richer black for "Luxury" feel */
-
+  background-color: #050505; 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -22,35 +19,31 @@
 }
 
 /* 3. UTILITY CLASSES FOR REACT */
-/* Use className="font-mono" for technical specs */
 .font-mono {
   font-family: 'Space Mono', monospace;
-  letter-spacing: -0.02em; /* Tighter for that 'code' look */
+  letter-spacing: -0.02em; 
 }
 
-/* Use className="font-heading" for big titles */
 .font-heading {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
-  letter-spacing: -0.04em; /* The "Swiss" tight squeeze */
+  letter-spacing: -0.04em; 
   text-transform: uppercase;
 }
 
-/* ... keep your existing overlay/canvas styles below ... */
+/* Ensure the 3D HTML layer isn't buried */
+.html-container {
+  z-index: 2 !important; 
+}
+
 .overlay-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  background: transparent !important;
   pointer-events: none;
-  z-index: 9999 !important;
 }
 
 canvas {
   z-index: 1 !important;
 }
-/* ... rest of your CSS ... */
 
 a {
   font-weight: 500;
@@ -103,195 +96,4 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
-}
-
-/* WATCH LOADER */
-.loader-watch-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: #000; /* Deep black background */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10000; /* Above everything */
-  transition: opacity 0.5s ease-out; /* Smooth fade out */
-}
-
-.clock-face {
-  width: 60px;
-  height: 60px;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  position: relative;
-}
-
-.clock-hand {
-  width: 2px;
-  height: 25px;
-  background: #fff;
-  position: absolute;
-  top: 5px; /* Center vertical anchor */
-  left: 50%;
-  transform-origin: bottom center; /* Pivot from the center of clock */
-  transform: translateX(-50%);
-  /* The Magic: 'steps(60)' makes it tick like a mechanical watch instead of sweep */
-  animation: tick-tock 2s steps(60) infinite; 
-}
-
-/* Optional: A small center dot */
-.clock-center {
-  width: 4px;
-  height: 4px;
-  background: #fff;
-  border-radius: 50%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-@keyframes tick-tock {
-  0% { transform: translateX(-50%) rotate(0deg); }
-  100% { transform: translateX(-50%) rotate(360deg); }
-}
-
-/* SHOE LOADING SCREEN */
-.loader-shoe-container {
-  position: fixed;
-  inset: 0;
-  background: #050505;
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: opacity 0.5s ease-out;
-  pointer-events: none;
-}
-
-.nike-swoosh-path {
-  fill: transparent; /* Start empty */
-  stroke: #fff;
-  stroke-width: 2; /* Thinner stroke looks cleaner on complex shapes */
-  
-  /* UPDATED: Increased because your new SVG is larger */
-  stroke-dasharray: 3000; 
-  stroke-dashoffset: 3000;
-  
-  animation: drawNike 2.5s ease-in-out forwards; /* 'forwards' keeps it filled at the end */
-}
-
-@keyframes drawNike {
-  0% {
-    stroke-dashoffset: 3000;
-    fill: transparent;
-  }
-  60% {
-    /* Step 1: Finish drawing the outline */
-    stroke-dashoffset: 0;
-    fill: transparent;
-  }
-  100% {
-    /* Step 2: Fade in the solid white fill */
-    stroke-dashoffset: 0;
-    fill: #fff; 
-  }
-  
-}
-
-/* --- SCOPED THEME: Only affects elements inside .forge-interface --- */
-
-/* 1. The Wrapper */
-.forge-interface {
-  position: relative;
-  width: 100%;
-  height: 100%; /* Or specific height like 600px if it's a section */
-  background: radial-gradient(circle at center, #2e2e2e 0%, #1a1a1a 100%);
-  font-family: 'Cinzel', serif; /* Only use the font here */
-  color: #d4af37; /* Gold text */
-  overflow: hidden;
-}
-
-/* 2. The Panel (Mobile First) */
-.forge-interface .ui-panel {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  padding: 20px;
-  background: rgba(15, 12, 8, 0.95);
-  border-top: 2px solid #d4af37;
-  backdrop-filter: blur(5px);
-  z-index: 10;
-}
-
-/* Desktop override */
-@media (min-width: 768px) {
-  .forge-interface .ui-panel {
-    width: 300px;
-    height: 100%;
-    right: 0;
-    left: auto;
-    bottom: auto;
-    border-top: none;
-    border-left: 2px solid #d4af37;
-  }
-}
-
-/* 3. Typography & Buttons (Scoped!) */
-.forge-interface h1 {
-  font-family: 'Cinzel', serif;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  text-align: center;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-  color: #d4af37;
-}
-
-.forge-interface button {
-  font-family: 'Cinzel', serif; /* Ensure buttons don't inherit portfolio font */
-  cursor: pointer;
-}
-
-/* 4. The Grid */
-.forge-interface .options-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-top: 15px;
-}
-
-.forge-interface .option-btn {
-  aspect-ratio: 1;
-  background: #222;
-  border: 1px solid #444;
-  color: #888;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-
-.forge-interface .option-btn.selected {
-  background: linear-gradient(135deg, #d4af37 0%, #8a7018 100%);
-  color: #1a1a1a;
-  border-color: #fff;
-  font-weight: bold;
-  box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
-}
-
-.forge-interface .tab-btn {
-  background: transparent;
-  border: none;
-  color: #666;
-  padding: 5px 10px;
-  border-bottom: 2px solid transparent;
-}
-
-.forge-interface .tab-btn.active {
-  color: #d4af37;
-  border-bottom-color: #d4af37;
 }

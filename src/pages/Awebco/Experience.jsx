@@ -1,119 +1,163 @@
-import React, { Suspense, useRef, useMemo } from 'react' // Added useMemo here
+import React, { Suspense, useRef, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { ScrollControls, Scroll, useScroll, Float, Stars, Environment } from '@react-three/drei'
 import * as THREE from 'three'
+import './components/Awebco.css'
 
 import Rocket from './components/Rocket'
-import Planet_01 from './components/Planet_01'
-import Asteroid from './components/Asteroid' // Ensure this is imported
 import Overlay from './components/Overlay'
 
-const CONFIG = {
-  rocket: {
-    position: [0, -1.2, -5],
-    scale: 1,
-    floatIntensity: 1.8, 
-    rotationIntensity: 0.5 
-  },
-  destinations: [
-    { id: "SABREBATS", entry: 0.15, exit: 0.45, startX: -25, endX: -8, yPos: -26 },
-    { id: "ATLAS", entry: 0.40, exit: 0.60, startX: 20, endX: 8, yPos: -50 },
-    { id: "SENTRY", entry: 0.65, exit: 1, startX: -20, endX: -8, yPos: -75 }
-  ]
+const showAsteroids = true;
+
+// 1. ADD THE 'mobile' TRIGGER TO THE CONFIG ARRAY
+export const PROJECTS = [
+  // Desktop starts at 0.30, shrinks to mobile at 0.40, leaves at 0.48
+  { id: 'atlas', url: 'https://atlastotalhome.com/', start: 0.30, mobile: 0.40, end: 0.48 },
+  // Desktop starts at 0.50, shrinks to mobile at 0.60, leaves at 0.68
+  { id: 'sentry', url: 'https://sentryroofing.com/', start: 0.50, mobile: 0.60, end: 0.68 }, 
+  // Desktop starts at 0.70, shrinks to mobile at 0.80, leaves at 0.88
+  { id: 'fetch', url: 'https://www.sabrebats.com/', start: 0.70, mobile: 0.80, end: 0.88 }, 
+]
+
+function LaunchSmoke() {
+  const smokeRef = useRef()
+  const scroll = useScroll()
+  const particles = useMemo(() => Array.from({ length: 40 }, () => ({
+    x: (Math.random() - 0.5) * 2.5,
+    z: (Math.random() - 0.5) * 2.5,
+    scale: Math.random() * 1.5 + 0.5,
+    speed: Math.random() * 0.04
+  })), [])
+
+  useFrame(() => {
+    const offset = scroll.offset
+    if (smokeRef.current) {
+      const visibility = THREE.MathUtils.smoothstep(offset, 0.01, 0.15) - THREE.MathUtils.smoothstep(offset, 0.25, 0.45)
+      smokeRef.current.children.forEach((puff, i) => {
+        if (offset < 0.01) puff.position.set(particles[i].x, 0, particles[i].z)
+        puff.position.y += particles[i].speed * (1 + offset * 15)
+        puff.scale.setScalar(particles[i].scale * (1 + offset * 10))
+        puff.material.opacity = visibility * 0.6
+      })
+    }
+  })
+
+  return (
+    <group ref={smokeRef} position={[0, -3.2, 0]}>
+      {particles.map((p, i) => (
+        <mesh key={i}>
+          <sphereGeometry args={[1, 16, 16]} />
+          <meshStandardMaterial color="#ffffff" transparent opacity={0} depthWrite={false} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+function AsteroidField() {
+  const data = useMemo(() => Array.from({ length: 60 }, () => ({
+    pos: [(Math.random() - 0.5) * 80, (Math.random() - 0.5) * 120, (Math.random() - 0.5) * 30 - 30],
+    scale: Math.random() * 0.6 + 0.1,
+    rot: [Math.random() * Math.PI, Math.random() * Math.PI, 0]
+  })), [])
+
+  return data.map((d, i) => (
+    <mesh key={i} position={d.pos} scale={d.scale} rotation={d.rot}>
+      <icosahedronGeometry args={[1, 0]} />
+      <meshStandardMaterial color="#333" roughness={1} />
+    </mesh>
+  ))
 }
 
 function Scene() {
   const scroll = useScroll()
-  const rigRef = useRef() 
-  const p1 = useRef(); const p2 = useRef(); const p3 = useRef();
+  const rocketRef = useRef()
 
-  // 1. GENERATE ASTEROIDS (Outside useFrame!)
-  const asteroidData = useMemo(() => {
-    return Array.from({ length: 60 }, () => ({
-      position: [
-        (Math.random() - 0.5) * 50, 
-        (Math.random() - 0.5) * 200, // Spread across the whole flight
-        (Math.random() - 0.5) * 30 - 15
-      ],
-      scale: Math.random() * 0.5 + 0.2,
-      rotation: [Math.random() * Math.PI, Math.random() * Math.PI, 0]
-    }))
-  }, [])
-
-  useFrame((state, delta) => {
+  useFrame((state) => {
     const offset = scroll.offset
-    
-    // VERTICAL FLIGHT
-    const targetY = -offset * 100 
-    state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, 0.1)
-    
-    if (rigRef.current) {
-      rigRef.current.position.y = state.camera.position.y
-    }
 
-    // PLANET SLIDE LOGIC
-    const animatePlanet = (ref, config) => {
-      if (ref.current) {
-        const entryProg = THREE.MathUtils.smoothstep(offset, config.entry, config.entry + 0.1)
-        const exitProg = THREE.MathUtils.smoothstep(offset, config.exit, config.exit + 0.1)
-        const currentX = THREE.MathUtils.lerp(config.startX, config.endX, entryProg - exitProg)
+    // --- CAROUSEL & MOBILE SLIDE LOGIC ---
+    PROJECTS.forEach((proj) => {
+      const portal = document.getElementById(`portal-${proj.id}`)
+      if (portal) {
+        const isActive = offset >= proj.start && offset <= proj.end
+        // Check if we have passed the mobile trigger point for THIS specific project
+        const isMobile = offset >= proj.mobile && offset <= proj.end
+
+        portal.style.opacity = isActive ? 1 : 0
+        portal.style.pointerEvents = isActive ? 'all' : 'none'
         
-        ref.current.position.x = currentX
-        ref.current.rotation.y += delta * 0.3
+        let slidePos = '150%' 
+        if (isActive) slidePos = '50%' 
+        if (offset > proj.end) slidePos = '-50%' 
+        
+        portal.style.left = slidePos
+
+        // Toggle the mobile class dynamically
+        if (isMobile) {
+          portal.classList.add('is-mobile')
+        } else {
+          portal.classList.remove('is-mobile')
+        }
       }
+    })
+
+    const cameraDepthLock = Math.min(offset, 0.30) 
+
+    if (rocketRef.current) {
+      const lift = THREE.MathUtils.smoothstep(offset, 0.05, 0.3) * 150 
+      rocketRef.current.position.y = -2 + lift
     }
 
-    animatePlanet(p1, CONFIG.destinations[0]);
-    animatePlanet(p2, CONFIG.destinations[1]);
-    animatePlanet(p3, CONFIG.destinations[2]);
+    const targetY = offset < 0.2 ? (rocketRef.current?.position.y || 0) + 2 : 0
+    const smoothY = THREE.MathUtils.lerp(state.camera.userData.lastY || 0, targetY, 0.05)
+    state.camera.userData.lastY = smoothY
+    
+    state.camera.position.z = 15 + cameraDepthLock * 15
+    state.camera.lookAt(0, smoothY, 0)
   })
 
   return (
     <>
-      {/* ROCKET RIG */}
-      <group ref={rigRef}>
-        <Float 
-          speed={4} 
-          rotationIntensity={CONFIG.rocket.rotationIntensity} 
-          floatIntensity={CONFIG.rocket.floatIntensity}
-        > 
-          <Rocket 
-            scale={CONFIG.rocket.scale} 
-            position={CONFIG.rocket.position} 
-          />
-        </Float>
-      </group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -4.1, 0]} receiveShadow>
+        <planeGeometry args={[100, 100]} />
+        <meshStandardMaterial color="#000814" roughness={1} />
+      </mesh>
 
-      {/* PLANETS */}
-      <Planet_01 ref={p1} position={[0, CONFIG.destinations[0].yPos, -15]} scale={5} />
-      <Planet_01 ref={p2} position={[0, CONFIG.destinations[1].yPos, -15]} scale={5} />
-      <Planet_01 ref={p3} position={[0, CONFIG.destinations[2].yPos, -15]} scale={5} />
+      <LaunchSmoke />
+      {showAsteroids && <AsteroidField />}
 
-      {/* ASTEROID FIELD */}
-      {asteroidData.map((data, i) => (
-        <Asteroid 
-          key={i} 
-          position={data.position} 
-          scale={data.scale} 
-          rotation={data.rotation} 
-        />
-      ))}
+      <Float speed={scroll.offset > 0.2 ? 5 : 1}>
+        <Rocket ref={rocketRef} scale={3} />
+      </Float>
 
-      <Stars radius={100} depth={100} count={7000} factor={4} saturation={0} fade speed={2} />
+      <Stars radius={200} count={10000} factor={4} fade speed={1} />
+      <Environment preset="city" />
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[10, 10, 10]} intensity={1.5} castShadow />
     </>
   )
 }
 
 export default function Experience() {
   return (
-    <div style={{ width: '100vw', height: '100vh', background: '#000814' }}>
-      <Canvas shadows camera={{ position: [0, 0, 10], fov: 35 }}>
-        <Environment preset="city" />
-        <ambientLight intensity={0.5} />
+    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+      
+      {/* MAP OUT THE 3 DOM PORTALS OUTSIDE THE CANVAS */}
+      {PROJECTS.map((proj) => (
+        <div key={proj.id} id={`portal-${proj.id}`} className="project-portal">
+          <iframe 
+            src={proj.url} 
+            title={`${proj.id} Project View`}
+          />
+        </div>
+      ))}
+
+      <Canvas shadows camera={{ position: [0, 0, 15], fov: 35 }}>
         <Suspense fallback={null}>
-          <ScrollControls pages={5} damping={0.2}>
+          <ScrollControls pages={8} damping={0.2}>
             <Scene />
-            <Scroll html>
+            <Scroll html style={{ width: '100%', height: '100%' }}>
               <Overlay />
             </Scroll>
           </ScrollControls>

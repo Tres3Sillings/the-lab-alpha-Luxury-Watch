@@ -2,8 +2,8 @@ import React, { useState, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { Canvas } from '@react-three/fiber'
 import { useGLTF, Environment, ContactShadows, OrbitControls, Html, useProgress } from '@react-three/drei'
-import { SwordModel } from './components/SwordTheLab.jsx'
-
+import { SwordModel } from '../../components/SwordTheLab.jsx'
+import './Forge.css'
 // --- 1. LOADER ---
 function Loader() {
   const { progress } = useProgress()
