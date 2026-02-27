@@ -8,9 +8,9 @@ const PI_2 = Math.PI * 2
 const SLOTS = [
   { name: 'NIKE LAB',      rad: -0.085 }, 
   { name: 'CHRONOS WATCH', rad: 0.72 }, 
-  { name: 'EXPLORE',       rad: 1.52 }, 
-  { name: 'EXPLORE',       rad: 2.30 }, 
-  { name: 'COMING SOON',   rad: 3.08 }, 
+  { name: 'AWEBCO',       rad: 1.52 }, 
+  { name: 'MATERIAL LAB',       rad: 2.30 }, 
+  { name: 'WORKSHOP',   rad: 3.08 }, 
   { name: 'EXPLORE',       rad: 3.87 }, 
   { name: 'SECRET ROOM',   rad: 4.65 }, 
   { name: 'EXPLORE',       rad: 5.43 }, 

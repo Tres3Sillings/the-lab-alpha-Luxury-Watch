@@ -38,4 +38,16 @@ export const PROJECT_DATA = {
     credits: 'Custom 3D assets created for AWEBCO.',
     link: '/awebco'
   },
+  project_04: {
+    title: 'Material Lab',
+    subtitle: 'Shader Playground',
+    overview: 'The goal was to create an interactive shader playground where users can experiment with different materials and see real-time changes. The project focuses on shader development and user interaction.',
+    approach: [
+      { title: 'Modeling', text: 'Created a variety of 3D objects to demonstrate different material properties.' },
+      { title: 'Dev', text: 'Implemented custom shaders using GLSL and integrated them into the React Three Fiber scene.' },
+      { title: 'UX', text: 'Designed a user-friendly interface for selecting and customizing materials.' }
+    ],
+    tech: ['React Three Fiber', 'GLSL', 'Tailwind CSS'],
+    link: '/materiallab'
+  }
 }

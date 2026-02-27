@@ -1,0 +1,125 @@
+.blueprint-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10; /* Ensures it sits on top of the canvas */
+  pointer-events: none; /* Allows you to still click/drag the spheres */
+  display: block;
+}
+
+.blueprint-overlay::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+              linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  z-index: 11;
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+}
+
+.corner {
+  position: absolute;
+}
+
+.top-left { top: 40px; left: 40px; border-left: 2px solid #00ff88; border-top: 2px solid #00ff88; padding: 10px; }
+.top-right { top: 40px; right: 40px; border-right: 2px solid #00ff88; border-top: 2px solid #00ff88; padding: 10px; text-align: right; }
+.bottom-left { bottom: 40px; left: 40px; border-left: 2px solid #00ff88; border-bottom: 2px solid #00ff88; padding: 10px; }
+.bottom-right { bottom: 40px; right: 40px; border-right: 2px solid #00ff88; border-bottom: 2px solid #00ff88; padding: 10px; text-align: right; }
+
+.label { font-size: 10px; opacity: 0.6; margin-bottom: 4px; }
+.value { font-size: 14px; font-weight: bold; letter-spacing: 1px; }
+
+.status-blink {
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* The Glitch Animation */
+@keyframes glitch {
+  0% { transform: translate(0); text-shadow: none; }
+  20% { transform: translate(-2px, 2px); text-shadow: 2px 0 #ff0000, -2px 0 #00ffff; }
+  40% { transform: translate(-2px, -2px); text-shadow: -2px 0 #ff0000, 2px 0 #00ffff; }
+  60% { transform: translate(2px, 2px); text-shadow: 2px 0 #ff0000, -2px 0 #00ffff; }
+  80% { transform: translate(2px, -2px); text-shadow: -2px 0 #ff0000, 2px 0 #00ffff; }
+  100% { transform: translate(0); text-shadow: none; }
+}
+
+.glitch-active {
+  animation: glitch 0.2s steps(2) infinite;
+  color: #fff !important; /* Briefly flash white for impact */
+}
+
+/* Targets the main Leva container more reliably */
+div[class*="leva-c-k"] {
+  top: 25% !important; /* Adjust this value to clear your 'SYSTEM_STATUS' overlay */
+  right: 10px !important;
+  height: auto;
+}
+/* Optional: Make the panel background match the lab vibe */
+.leva-c-kWgxhW {
+  border: 1px solid #00ff88 !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(10px);
+}
+
+.center-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  opacity: 0.3;
+}
+
+.line-h { width: 100%; height: 1px; background: #00ff88; position: absolute; top: 50%; }
+.line-v { height: 100%; width: 1px; background: #00ff88; position: absolute; left: 50%; }
+
+.side-bar {
+  position: absolute;
+  top: 20%;
+  height: 60%;
+  width: 2px;
+  background: rgba(0, 255, 136, 0.1);
+}
+
+.side-bar.left { left: 20px; }
+
+.scanner-line {
+  width: 100%;
+  height: 20px;
+  background: #00ff88;
+  position: absolute;
+  animation: scan 4s linear infinite;
+}
+
+@keyframes scan {
+  from { top: 0; }
+  to { top: 100%; }
+}
+
+.lab-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  overflow: hidden;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}

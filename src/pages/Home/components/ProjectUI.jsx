@@ -69,7 +69,7 @@ export default function ProjectUI({ activeProject, onBack }) {
         initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }}
         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(10px)', overflowY: 'auto', padding: '80px 20px 40px 20px', pointerEvents: 'auto', zIndex: 50 }}
       >
-        <button onClick={onBack} style={{ position: 'absolute', top: '20px', left: '20px', background: 'none', border: 'none', color: '#666', fontSize: '1rem' }}>← BACK</button>
+        <button onClick={onBack} style={{ position: 'absolute', top: '20px', left: '0px', background: 'none', border: 'none', color: '#00f2ff', fontSize: '1rem' }}>← BACK</button>
         
         <h2 style={{ color: 'white', fontSize: '2.5rem', fontFamily: 'Impact, sans-serif', textTransform: 'uppercase', lineHeight: 0.9 }}>{content.title}</h2>
         <h2 style={{ color: '#00f2ff', fontSize: '1.2rem', margin: '5px 0 20px 0', fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '2px' }}>{content.subtitle}</h2>
@@ -165,7 +165,7 @@ export default function ProjectUI({ activeProject, onBack }) {
       {/* BACK BUTTON */}
       <button 
         onClick={onBack}
-        style={{ position: 'absolute', bottom: '40px', left: '50px', pointerEvents: 'auto', background: 'none', border: 'none', color: '#666', fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}
+        style={{ position: 'absolute', bottom: '40px', left: '50px', pointerEvents: 'auto', background: 'none', border: 'none', color: '#ffffff', fontSize: '1.2rem', cursor: 'pointer', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}
       >
         <span style={{ fontSize: '1.2rem', color: '#00f2ff' }}>←</span> Return to Hub
       </button>
