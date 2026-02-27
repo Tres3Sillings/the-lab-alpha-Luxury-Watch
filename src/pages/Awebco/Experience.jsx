@@ -9,13 +9,10 @@ import Overlay from './components/Overlay'
 
 const showAsteroids = true;
 
-// 1. ADD THE 'mobile' TRIGGER TO THE CONFIG ARRAY
+// Project Configuration Array
 export const PROJECTS = [
-  // Desktop starts at 0.30, shrinks to mobile at 0.40, leaves at 0.48
   { id: 'atlas', url: 'https://atlastotalhome.com/', start: 0.30, mobile: 0.40, end: 0.48 },
-  // Desktop starts at 0.50, shrinks to mobile at 0.60, leaves at 0.68
   { id: 'sentry', url: 'https://sentryroofing.com/', start: 0.50, mobile: 0.60, end: 0.68 }, 
-  // Desktop starts at 0.70, shrinks to mobile at 0.80, leaves at 0.88
   { id: 'fetch', url: 'https://www.sabrebats.com/', start: 0.70, mobile: 0.80, end: 0.88 }, 
 ]
 
@@ -81,27 +78,30 @@ function Scene() {
       const portal = document.getElementById(`portal-${proj.id}`)
       if (portal) {
         const isActive = offset >= proj.start && offset <= proj.end
-        // Check if we have passed the mobile trigger point for THIS specific project
-        const isMobile = offset >= proj.mobile && offset <= proj.end
-
+        const windowWidth = window.innerWidth
+        
         portal.style.opacity = isActive ? 1 : 0
         portal.style.pointerEvents = isActive ? 'all' : 'none'
-        
-        let slidePos = '150%' 
-        if (isActive) slidePos = '50%' 
-        if (offset > proj.end) slidePos = '-50%' 
-        
-        portal.style.left = slidePos
+        portal.style.left = isActive ? '50%' : (offset > proj.end ? '-50%' : '150%')
 
-        // Toggle the mobile class dynamically
-        if (isMobile) {
-          portal.classList.add('is-mobile')
+        if (windowWidth < 768) {
+          if (isActive) {
+            portal.classList.add('is-mobile')
+            portal.style.width = '350px' 
+            portal.style.aspectRatio = '9 / 16'
+          }
         } else {
-          portal.classList.remove('is-mobile')
+          const isMobileTime = offset >= proj.mobile && offset <= proj.end
+          if (isMobileTime) {
+            portal.classList.add('is-mobile')
+          } else {
+            portal.classList.remove('is-mobile')
+          }
         }
       }
     })
 
+    // --- CAMERA & ROCKET FLIGHT ---
     const cameraDepthLock = Math.min(offset, 0.30) 
 
     if (rocketRef.current) {
@@ -143,7 +143,7 @@ export default function Experience() {
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
       
-      {/* MAP OUT THE 3 DOM PORTALS OUTSIDE THE CANVAS */}
+      {/* MAP OUT THE DOM PORTALS OUTSIDE THE CANVAS */}
       {PROJECTS.map((proj) => (
         <div key={proj.id} id={`portal-${proj.id}`} className="project-portal">
           <iframe 
