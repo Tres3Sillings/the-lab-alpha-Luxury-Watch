@@ -8,7 +8,7 @@ import Shoe from './pages/ShoeLab/Shoe.jsx'
 import Sword from './pages/Forge/Sword.jsx' // Importing the Sword Page/Builder
 import Awebco from './pages/Awebco/Experience.jsx' // Importing the Awebco Page/Builder
 import MaterialLab from './pages/MaterialLab/Experience.jsx' // Importing the Material Lab Page/Builder
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet"></link>
+import AgenticAi from './pages/AgenticAIOutfitPicker/Experience.jsx' // Importing the Agentic AI Outfit Picker Page/Builder
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -21,6 +21,7 @@ createRoot(document.getElementById('root')).render(
       <Route path="/sword" element={<Sword />} />
       <Route path="/awebco" element={<Awebco />} />
       <Route path="/materiallab" element={<MaterialLab />} />
+      <Route path="/agenticai" element={<AgenticAi />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

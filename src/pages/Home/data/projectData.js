@@ -49,5 +49,18 @@ export const PROJECT_DATA = {
     ],
     tech: ['React Three Fiber', 'GLSL', 'Tailwind CSS'],
     link: '/materiallab'
-  }
+  },
+  project_05: {
+    title: 'Work Shop',
+    subtitle: 'Things im working on',
+    overview: 'The goal was to create a dynamic portfolio section showcasing ongoing projects. The project features a grid layout with interactive elements and real-time updates.',
+    approach: [
+      { title: 'Modeling', text: 'Designed a grid layout with interactive elements for each project.' },
+      { title: 'Dev', text: 'Built with React and integrated real-time updates for project statuses.' },
+      { title: 'UX', text: 'Focused on clear communication of project statuses and easy navigation.' }
+    ],
+    tech: ['React', 'Tailwind CSS'],
+    link: '/workshop'
+  },
+
 }
