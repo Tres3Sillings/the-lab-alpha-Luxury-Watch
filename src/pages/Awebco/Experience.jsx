@@ -4,12 +4,12 @@ import { ScrollControls, Scroll, useScroll, Float, Stars, Environment } from '@r
 import * as THREE from 'three'
 import './components/Awebco.css'
 
-import Rocket from './components/Rocket'
+import RocketAwebco from './components/RocketAwebco'
+import EnvironmentAwebco from './components/EnviromentAwebco'
 import Overlay from './components/Overlay'
 
 const showAsteroids = true;
 
-// Project Configuration Array
 export const PROJECTS = [
   { id: 'atlas', url: 'https://atlastotalhome.com/', start: 0.30, mobile: 0.40, end: 0.48 },
   { id: 'sentry', url: 'https://sentryroofing.com/', start: 0.50, mobile: 0.60, end: 0.68 }, 
@@ -40,10 +40,10 @@ function LaunchSmoke() {
   })
 
   return (
-    <group ref={smokeRef} position={[0, -3.2, 0]}>
+    <group ref={smokeRef} position={[0, 0.2, 0]} rotation={[-Math.PI / 1, 0, 0]}>
       {particles.map((p, i) => (
         <mesh key={i}>
-          <sphereGeometry args={[1, 16, 16]} />
+          <sphereGeometry args={[.8, 16, 16]} />
           <meshStandardMaterial color="#ffffff" transparent opacity={0} depthWrite={false} />
         </mesh>
       ))}
@@ -68,92 +68,108 @@ function AsteroidField() {
 
 function Scene() {
   const scroll = useScroll()
-  const rocketRef = useRef()
+  const rocketWrapperRef = useRef()
 
-  useFrame((state) => {
+  const PLATFORM_WIDTH = 17.8; 
+
+useFrame((state) => {
     const offset = scroll.offset
 
-    // --- CAROUSEL & MOBILE SLIDE LOGIC ---
+    // --- 1. CAROUSEL / SITE REVEAL LOGIC ---
     PROJECTS.forEach((proj) => {
       const portal = document.getElementById(`portal-${proj.id}`)
       if (portal) {
         const isActive = offset >= proj.start && offset <= proj.end
-        const windowWidth = window.innerWidth
-        
         portal.style.opacity = isActive ? 1 : 0
         portal.style.pointerEvents = isActive ? 'all' : 'none'
         portal.style.left = isActive ? '50%' : (offset > proj.end ? '-50%' : '150%')
-
-        if (windowWidth < 768) {
-          if (isActive) {
-            portal.classList.add('is-mobile')
-            portal.style.width = '350px' 
-            portal.style.aspectRatio = '9 / 16'
-          }
-        } else {
-          const isMobileTime = offset >= proj.mobile && offset <= proj.end
-          if (isMobileTime) {
-            portal.classList.add('is-mobile')
-          } else {
-            portal.classList.remove('is-mobile')
-          }
-        }
       }
     })
 
-    // --- CAMERA & ROCKET FLIGHT ---
-    const cameraDepthLock = Math.min(offset, 0.30) 
+    // --- 2. THE MASTER BELL CURVE (0 -> 1 -> 0) ---
+    // This value gracefully arcs up as the rocket launches (offset 0.05 to 0.20)
+    // and returns perfectly to 0 as the UI slides in (offset 0.20 to 0.30).
+    const launchPhase = THREE.MathUtils.smoothstep(offset, 0.05, 0.20)
+    const returnPhase = THREE.MathUtils.smoothstep(offset, 0.20, 0.30)
+    const cinematicCurve = launchPhase - returnPhase 
 
-    if (rocketRef.current) {
+    // --- 3. CAMERA POSITION (RUBBER BAND EFFECT) ---
+    // Start at Blender defaults. At peak launch (cinematicCurve = 1), 
+    // pull back +6 on X and drop -1.6 on Y for a cinematic low-angle shot.
+    // It returns exactly to 9.06, 2.16, 0.08 when cinematicCurve goes back to 0.
+    state.camera.position.x = 9.06 + (cinematicCurve * 6)
+    state.camera.position.y = 2.16 - (cinematicCurve * 1.6)
+    state.camera.position.z = 0.08
+
+    // --- 4. ROCKET LIFTOFF ---
+    if (rocketWrapperRef.current) {
+      // The rocket does NOT return. It flies up to 150 and stays gone.
       const lift = THREE.MathUtils.smoothstep(offset, 0.05, 0.3) * 150 
-      rocketRef.current.position.y = -2 + lift
+      rocketWrapperRef.current.position.y = lift
     }
 
-    const targetY = offset < 0.2 ? (rocketRef.current?.position.y || 0) + 2 : 0
-    const smoothY = THREE.MathUtils.lerp(state.camera.userData.lastY || 0, targetY, 0.05)
-    state.camera.userData.lastY = smoothY
-    
-    state.camera.position.z = 15 + cameraDepthLock * 15
-    state.camera.lookAt(0, smoothY, 0)
+    // --- 5. CAMERA PAN (LOOK-AT) ---
+    // Tracks the rocket up to Y=60, then smoothly pans the neck right back 
+    // down to Y=0 (your original focal point) to match the starting view.
+    state.camera.lookAt(0, cinematicCurve * 60, 0)
   })
 
   return (
     <>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -4.1, 0]} receiveShadow>
-        <planeGeometry args={[100, 100]} />
-        <meshStandardMaterial color="#000814" roughness={1} />
-      </mesh>
+      {/* 3x Looped Environment */}
+      <EnvironmentAwebco position={[0, 0, 0]} scale={1} />
+      <EnvironmentAwebco position={[0, 0, -PLATFORM_WIDTH]} scale={1} />
+      <EnvironmentAwebco position={[0, 0, PLATFORM_WIDTH]} scale={1} />
 
       <LaunchSmoke />
-      {showAsteroids && <AsteroidField />}
+      {/* showAsteroids && <AsteroidField /> */}
 
-      <Float speed={scroll.offset > 0.2 ? 5 : 1}>
-        <Rocket ref={rocketRef} scale={3} />
-      </Float>
+      <group ref={rocketWrapperRef}>
+        <Float speed={scroll.offset > 0.2 ? 5 : 1} rotationIntensity={0.5} floatIntensity={0.5}>
+          <RocketAwebco scale={1} position={[0, 0, 0]} />
+        </Float>
+      </group>
 
-      <Stars radius={200} count={10000} factor={4} fade speed={1} />
       <Environment preset="city" />
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[10, 10, 10]} intensity={1.5} castShadow />
+      <ambientLight intensity={0.4} />
+      <directionalLight position={[10, 10, 5]} intensity={1.5} />
     </>
   )
 }
 
 export default function Experience() {
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ 
+      width: '100vw', 
+      height: '100vh', 
+      position: 'relative', 
+      overflow: 'hidden', 
+      backgroundColor: '#000',
+      // --- BACKGROUND SET HERE ---
+      backgroundImage: 'url(/BackdropAwebco.png)', 
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
+    }}>
       
-      {/* MAP OUT THE DOM PORTALS OUTSIDE THE CANVAS */}
       {PROJECTS.map((proj) => (
         <div key={proj.id} id={`portal-${proj.id}`} className="project-portal">
           <iframe 
             src={proj.url} 
             title={`${proj.id} Project View`}
+            style={{ width: '100%', height: '100%', border: 'none' }}
           />
         </div>
       ))}
 
-      <Canvas shadows camera={{ position: [0, 0, 15], fov: 35 }}>
+      {/* Canvas is transparent by default, so the CSS background will show through */}
+    <Canvas 
+  shadows={false} 
+  camera={{ 
+    position: [9.06, 2.16, 0.08], 
+    fov: 40 // The 50mm equivalent
+  }}
+>
         <Suspense fallback={null}>
           <ScrollControls pages={8} damping={0.2}>
             <Scene />
