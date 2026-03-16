@@ -8,7 +8,7 @@ import Shoe from './pages/ShoeLab/Shoe.jsx'
 import Sword from './pages/Forge/Sword.jsx' // Importing the Sword Page/Builder
 import Awebco from './pages/Awebco/Experience.jsx' // Importing the Awebco Page/Builder
 import MaterialLab from './pages/MaterialLab/Experience.jsx' // Importing the Material Lab Page/Builder
-import AgenticAi from './pages/AgenticAIOutfitPicker/Experience.jsx' // Importing the Agentic AI Outfit Picker Page/Builder
+import AgenticAi from './pages/AgenticAI/Experience.jsx' // Importing the Agentic AI Outfit Picker Page/Builder
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

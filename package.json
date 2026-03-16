@@ -10,10 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/model-viewer": "^4.2.0",
     "@gsap/react": "^2.1.2",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@react-three/postprocessing": "^3.0.4",
+    "@react-three/xr": "^6.6.29",
     "@tailwindcss/vite": "^4.1.18",
     "@theatre/core": "^0.7.2",
     "@theatre/r3f": "^0.7.2",
