@@ -4,7 +4,7 @@ import { ScrollControls, Scroll, useScroll, Float, Stars, Environment } from '@r
 import * as THREE from 'three'
 import './components/Awebco.css'
 
-import RocketAwebco from './components/RocketAwebco'
+import RocketAwebco from './components/Rocketawebco'
 import EnvironmentAwebco from './components/EnviromentAwebco'
 import Overlay from './components/Overlay'
 
