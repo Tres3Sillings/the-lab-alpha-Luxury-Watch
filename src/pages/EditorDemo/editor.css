@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+.editor-demo-container {
+  /* You can define specific CSS variables for the editor here */
+}
+
+/* Force override global button styles from index.css just for the editor */
+.editor-demo-container button {
+  background: none;
+  border-color: #E5E5E5 !important; /* Default border color */
+  /* Add any other default resets you need here */
+}
+
+/* Hover: Light gray background with a black outline/border */
+.editor-demo-container button:hover {
+  border-color: black !important;
+}
+
+h1 {
+  font-size: 1.5em;
+  line-height: 1.1;
+}
+
+/* #E5E5E5 */
