@@ -11,6 +11,7 @@ import MaterialLab from './pages/MaterialLab/Experience.jsx' // Importing the Ma
 import AgenticAi from './pages/AgenticAI/Experience.jsx' // Importing the Agentic AI Outfit Picker Page/Builder
 import Workshop from './pages/Workshop/Experience.jsx' // Importing the Workshop Page/Builder
 import EditorDemo from './pages/EditorDemo/Experience.jsx' // Importing the Editor Demo Page/Builder
+import CoffinEditor from './pages/CoffinEditor/Experience.jsx' // Importing the Coffin Editor Page/Builder
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -26,6 +27,7 @@ createRoot(document.getElementById('root')).render(
       <Route path="/agenticai" element={<AgenticAi />} />
       <Route path="/workshop" element={<Workshop />} />
       <Route path="/editor-demo" element={<EditorDemo />} />
+      <Route path="/coffin-editor" element={<CoffinEditor />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
