@@ -8,15 +8,14 @@ export const projectsData = [
   {
     id: 'forge',
     title: 'THE FORGE',
-    url: '/forge', // Internal link
-    // Using high-quality abstract placeholders until you replace them with screenshots
+    url: '/forge',
     image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=800&auto=format&fit=crop',
     isExternal: false
   },
   {
     id: 'agentic-ai',
     title: 'AGENTIC AI',
-    url: '/agenticai', // Internal link
+    url: '/agenticai',
     image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=800&auto=format&fit=crop',
     isExternal: false
   },
@@ -28,16 +27,16 @@ export const projectsData = [
     isExternal: false
   },
   {
-    id: 'project-4',
-    title: 'COMING SOON',
-    url: '#',
-    image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop',
+    id: 'CoffinEditor',
+    title: 'Coffin Configurator',
+    url: '/coffin-editor',
+    image: '/Coffin-Editor.png', 
     isExternal: false
   },
   {
     id: 'project-5',
     title: 'EXTERNAL DEMO',
-    url: 'https://github.com', // External link
+    url: 'https://github.com',
     image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop',
     isExternal: true
   },
@@ -58,8 +57,8 @@ function ProjectCard({ project, position, rotation }) {
   // Smooth hover animation for scaling the card
   useFrame((state, delta) => {
     if (imageRef.current) {
-      const targetScale = hovered ? 1.1 : 1; // Grow by 10% on hover
-      // Base size is 3x2, we scale that
+      const targetScale = hovered ? 1.1 : 1;
+      // Base size is 3x2, applying lerp for smooth transitions
       imageRef.current.scale.x = THREE.MathUtils.lerp(imageRef.current.scale.x, 3 * targetScale, delta * 6);
       imageRef.current.scale.y = THREE.MathUtils.lerp(imageRef.current.scale.y, 2 * targetScale, delta * 6);
     }
@@ -78,7 +77,7 @@ function ProjectCard({ project, position, rotation }) {
   };
 
   const handleClick = () => {
-    document.body.style.cursor = 'auto'; // Reset cursor before navigating
+    document.body.style.cursor = 'auto';
     if (project.isExternal) {
       window.open(project.url, '_blank');
     } else {
@@ -96,8 +95,9 @@ function ProjectCard({ project, position, rotation }) {
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
         onClick={handleClick}
+        // zoom={1} mimics object-fit: cover for the local Coffin-Editor.png
+        zoom={.5} 
       />
-      {/* Project Title rendered underneath the image */}
       <Text
         position={[0, -1.4, 0]}
         fontSize={0.18}
@@ -121,12 +121,9 @@ function Carousel({ radius = 4.5 }) {
   return (
     <group>
       {projectsData.map((project, i) => {
-        // Calculate position in a circle
         const angle = (i / count) * Math.PI * 2;
         const x = Math.sin(angle) * radius;
         const z = Math.cos(angle) * radius;
-        
-        // Rotate the cards so they face outwards from the center
         const rotation = [0, angle, 0];
 
         return <ProjectCard key={project.id} project={project} position={[x, 0, z]} rotation={rotation} />;
@@ -137,34 +134,30 @@ function Carousel({ radius = 4.5 }) {
 
 // 4. Main Experience View
 export default function Experience() {
-  // Optional: Clean up cursor on unmount
   useEffect(() => {
     return () => { document.body.style.cursor = 'auto'; };
   }, []);
 
   return (
     <div style={{ width: '100vw', height: '100vh', background: '#050505', position: 'relative', overflow: 'hidden' }}>
-      {/* UI Overlay */}
       <div style={{ position: 'absolute', top: 40, left: 40, zIndex: 10, color: 'white', fontFamily: 'sans-serif' }}>
         <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 900, letterSpacing: '2px' }}>THE WORKSHOP.</h1>
         <p style={{ margin: '8px 0 0', fontSize: '14px', color: '#888' }}>Drag horizontally to explore the lab's projects</p>
       </div>
 
-      <Canvas camera={{ position: [0, 0, 7.5], fov: 50 }}>
+      <Canvas camera={{ position: [0, 0, 7.5], fov: 70 }}>
         <ambientLight intensity={0.6} />
         <Environment preset="city" />
         <Carousel />
         <ContactShadows position={[0, -2, 0]} opacity={0.4} scale={20} blur={2} far={4} color="#000000" />
         
-        {/* OrbitControls configured for a horizontal 'globe drag' feel */}
         <OrbitControls
           enableZoom={false}
           enablePan={false}
-          // Lock vertical rotation (polar angles) to keep it perfectly horizontal like a carousel
           minPolarAngle={Math.PI / 2}
           maxPolarAngle={Math.PI / 2}
-          rotateSpeed={0.6} // Adjust sensitivity
-          dampingFactor={0.05} // Smooth inertia
+          rotateSpeed={0.6}
+          dampingFactor={0.05}
           makeDefault
         />
       </Canvas>
