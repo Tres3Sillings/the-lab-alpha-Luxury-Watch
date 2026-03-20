@@ -15,7 +15,7 @@ const COLORS = {
 export default function Experience() {
   // Configuration states
   const [coffinMaterial, setCoffinMaterial] = useState('White Marble');
-  const [metalColor, setMetalColor] = useState('#3D454C');
+  const [metalColor, setMetalColor] = useState('#a06127');
   const [handles, setHandles] = useState('standard');
   const [ornament, setOrnament] = useState('none');
 
