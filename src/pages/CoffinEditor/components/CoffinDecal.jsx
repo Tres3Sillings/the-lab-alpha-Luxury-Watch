@@ -9,7 +9,7 @@ export default function CoffinDecal({ url }) {
   
   return (
     <mesh 
-      position={[0, 0.006, 0]} // Just 0.006 units above the metal's center so it doesn't Z-fight
+      position={[0, 0.001, 0]} // Hugs the metal tightly at 0.001 so it lays under the nameplates
       rotation={[-Math.PI / 2, 0, 0]} // Lays perfectly flat inside its parent group
     >
       {/* Exact physical width and depth of the metal trim */}

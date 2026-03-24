@@ -6,7 +6,7 @@ import { Model as CoffinModel } from './Coffin';
 import { COLORS, METAL_COLORS } from '../constants';
 
 export default function ConfiguratorCanvas({
-  coffinMaterial, metalColor, handles, handleColor, ornament, decalImage,
+  coffinMaterial, metalColor, handles, handleColor, ornament, nameplate, decalImage,
   editorMode, glRef, cameraRef, sceneRef, controlsRef
 }) {
   return (
@@ -30,6 +30,7 @@ export default function ConfiguratorCanvas({
             handleColor={METAL_COLORS[handleColor] || METAL_COLORS['Bronze']}
             handles={handles} 
             ornament={ornament} 
+            nameplate={nameplate}
             decalImage={decalImage}
           />
         </Suspense>

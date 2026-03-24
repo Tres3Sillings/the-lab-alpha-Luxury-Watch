@@ -13,6 +13,7 @@ export default function Experience() {
   const [handles, setHandles] = useState(queryParams.get('handles') || 'standard');
   const [handleColor, setHandleColor] = useState(queryParams.get('handleColor') || 'Bronze');
   const [ornament, setOrnament] = useState(queryParams.get('ornament') || 'none');
+  const [nameplate, setNameplate] = useState(queryParams.get('nameplate') || 'standard');
   const [decalImage, setDecalImage] = useState(null);
   const [editorMode, setEditorMode] = useState('main'); // Tracks which UI screen we are on
 
@@ -29,10 +30,11 @@ export default function Experience() {
     params.set('handles', handles);
     params.set('handleColor', handleColor);
     params.set('ornament', ornament);
+    params.set('nameplate', nameplate);
     
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     window.history.replaceState({}, '', newUrl);
-  }, [coffinMaterial, metalColor, handles, handleColor, ornament]);
+  }, [coffinMaterial, metalColor, handles, handleColor, ornament, nameplate]);
 
   useEffect(() => {
     console.log("Current Coffin Material selected:", coffinMaterial);
@@ -70,6 +72,7 @@ export default function Experience() {
         handles={handles} setHandles={setHandles}
         handleColor={handleColor} setHandleColor={setHandleColor}
         ornament={ornament} setOrnament={setOrnament}
+        nameplate={nameplate} setNameplate={setNameplate}
         decalImage={decalImage} setDecalImage={setDecalImage}
         editorMode={editorMode}
         handleEnterDecalMode={handleEnterDecalMode}
@@ -82,6 +85,7 @@ export default function Experience() {
         handleColor={handleColor}
         handles={handles}
         ornament={ornament}
+        nameplate={nameplate}
         decalImage={decalImage}
         editorMode={editorMode}
         glRef={glRef}

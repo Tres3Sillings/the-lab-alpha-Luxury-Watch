@@ -9,6 +9,7 @@ export default function CoffinEditor() {
   const [handles, setHandles] = useState('standard');
   const [handleColor, setHandleColor] = useState('Bronze');
   const [ornament, setOrnament] = useState('cross');
+  const [nameplate, setNameplate] = useState('standard');
   const [decalImage, setDecalImage] = useState(null);
 
   // Refs for 3D scene
@@ -25,6 +26,7 @@ export default function CoffinEditor() {
         handles={handles} setHandles={setHandles}
         handleColor={handleColor} setHandleColor={setHandleColor}
         ornament={ornament} setOrnament={setOrnament}
+        nameplate={nameplate} setNameplate={setNameplate}
         decalImage={decalImage} setDecalImage={setDecalImage}
         glRef={glRef}
       />
@@ -34,6 +36,7 @@ export default function CoffinEditor() {
         handles={handles}
         handleColor={handleColor}
         ornament={ornament}
+        nameplate={nameplate}
         decalImage={decalImage}
         glRef={glRef}
         cameraRef={cameraRef}

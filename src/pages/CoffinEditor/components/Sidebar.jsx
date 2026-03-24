@@ -11,6 +11,7 @@ export default function Sidebar({
   handles, setHandles,
   handleColor, setHandleColor,
   ornament, setOrnament,
+  nameplate, setNameplate,
   decalImage, setDecalImage,
   glRef
 }) {
@@ -39,6 +40,7 @@ export default function Sidebar({
         { option: 'Metal Finish', value: metalColor },
         { option: 'Handles', value: handles },
         { option: 'Handle Color', value: handleColor },
+        { option: 'Nameplate', value: nameplate },
         { option: 'Ornament', value: ornament },
     ];
 
@@ -108,6 +110,7 @@ export default function Sidebar({
               <option value="none">None</option>
               <option value="standard">Standard Brass</option>
               <option value="ornate">Ornate Premium</option>
+              <option value="plastic">Plastic</option>
             </select>
           </div>
 
@@ -132,6 +135,20 @@ export default function Sidebar({
               <option value="none">None</option>
               <option value="cross">Classic Cross</option>
               <option value="rose">Bronze Rose</option>
+            </select>
+          </div>
+
+          {/* Nameplate Settings */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', color: COLORS.white }}>Nameplate</h3>
+            <select 
+              value={nameplate} 
+              onChange={(e) => setNameplate(e.target.value)}
+              style={selectStyles}
+            >
+              <option value="none">None</option>
+              <option value="standard">Standard</option>
+              <option value="ornate">Ornate Premium</option>
             </select>
           </div>
 
