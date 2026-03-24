@@ -1,0 +1,18 @@
+/* Scoped CSS for the Coffin Editor to override global defaults */
+
+.coffin-editor button {
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.25s, background-color 0.25s;
+}
+
+/* We use :not([class*="bg-"]) so this default #e5e5e5 background doesn't overwrite your new Tailwind Sidebar buttons! */
+.coffin-editor button:not([class*="bg-"]) {
+    background-color: #e5e5e5;
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    color: #ffffff;
+}
