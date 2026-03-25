@@ -13,7 +13,7 @@ export default function Experience() {
 
   // Configuration states
   const [coffinMaterial, setCoffinMaterial] = useState(queryParams.get('material') || 'White Marble');
-  const [metalColor, setMetalColor] = useState(queryParams.get('metal') || 'Bronze');
+  const [metalFinish, setMetalFinish] = useState(queryParams.get('metalFinish') || 'Bronze');
   const [handles, setHandles] = useState(queryParams.get('handles') || 'standard');
   const [handleColor, setHandleColor] = useState(queryParams.get('handleColor') || 'Bronze');
   const [ornament, setOrnament] = useState(queryParams.get('ornament') || 'none');
@@ -36,7 +36,7 @@ export default function Experience() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     params.set('material', coffinMaterial);
-    params.set('metal', metalColor);
+    params.set('metalFinish', metalFinish);
     params.set('handles', handles);
     params.set('handleColor', handleColor);
     params.set('ornament', ornament);
@@ -46,11 +46,11 @@ export default function Experience() {
     
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     window.history.replaceState({}, '', newUrl);
-  }, [coffinMaterial, metalColor, handles, handleColor, ornament, nameplate, nameplateColor, ornamentColor]);
+  }, [coffinMaterial, metalFinish, handles, handleColor, ornament, nameplate, nameplateColor, ornamentColor]);
 
   const handleReset = () => {
     setCoffinMaterial('White Marble');
-    setMetalColor('Bronze');
+    setMetalFinish('Bronze');
     setHandles('standard');
     setHandleColor('Bronze');
     setOrnament('none');
@@ -85,7 +85,7 @@ export default function Experience() {
 
     const body = [
         { option: 'Coffin Material', value: coffinMaterial },
-        { option: 'Metal Finish', value: metalColor },
+        { option: 'Metal Finish', value: metalFinish },
         { option: 'Handles', value: handles },
         { option: 'Handle Color', value: handleColor },
         { option: 'Nameplate', value: nameplate },
@@ -146,8 +146,8 @@ export default function Experience() {
         <ConfiguratorCanvas 
           coffinMaterial={coffinMaterial}
           setCoffinMaterial={setCoffinMaterial}
-          metalColor={metalColor}
-          setMetalColor={setMetalColor}
+          metalFinish={metalFinish}
+          setMetalFinish={setMetalFinish}
           handleColor={handleColor}
           setHandleColor={setHandleColor}
           handles={handles}

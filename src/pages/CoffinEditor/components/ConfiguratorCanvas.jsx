@@ -3,7 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { CameraControls, Environment, ContactShadows, Text, RoundedBox } from '@react-three/drei';
 import * as THREE from 'three';
 import { Model as CoffinModel } from './Coffin';
-import { COLORS, METAL_COLORS } from '../constants';
+import { COLORS, METAL_COLORS, METAL_FINISH, VAULT_MATERIALS } from '../constants';
 
 function Panel3D({ position, width, height, scale = 1, children }) {
   return (
@@ -73,7 +73,7 @@ function TextButton3D({ position, text, active, onClick }) {
 
 export default function ConfiguratorCanvas({
   coffinMaterial, setCoffinMaterial,
-  metalColor, setMetalColor,
+  metalFinish, setMetalFinish,
   handles, setHandles,
   handleColor, setHandleColor,
   ornament, setOrnament,
@@ -107,20 +107,39 @@ export default function ConfiguratorCanvas({
     }
   }, [activeHotspot, editorMode, controlsRef]);
 
+  // --- Dynamic Offset Helpers ---
+  const getSwatchX = (index, total) => (index - (total - 1) / 2) * 0.22;
+  const getSwatchY = (index, total) => -(index - (total - 1) / 2) * 0.2;
+  const getNameplateY = (index, total) => -(index - (total - 1) / 2) * 0.15;
+
   // --- 3D Popup UIs ---
   const materialOptions = (
     <Panel3D position={isMobile ? [0, 0.25, 0] : [0.2, 0, 0]} width={0.7} height={0.25} scale={isMobile ? 0.8 : 1}>
-      <ColorSwatch3D position={[-0.22, 0, 0]} color="#FFFFFF" name="White Marble" active={coffinMaterial === 'White Marble'} onClick={() => setCoffinMaterial('White Marble')} />
-      <ColorSwatch3D position={[0.22, 0, 0]} color="#111111" name="Black Marble" active={coffinMaterial === 'Black Marble'} onClick={() => setCoffinMaterial('Black Marble')} />
-      <ColorSwatch3D position={[0, 0, 0]} color="#73000A" name="Rose Granite" active={coffinMaterial === 'Rose Granite'} onClick={() => setCoffinMaterial('Rose Granite')} />
+      {Object.entries(VAULT_MATERIALS).map(([name, data], i, arr) => (
+        <ColorSwatch3D 
+          key={name}
+          position={[getSwatchX(i, arr.length), 0, 0]} 
+          color={data.color} 
+          name={name} 
+          active={coffinMaterial === name} 
+          onClick={() => setCoffinMaterial(name)} 
+        />
+      ))}
     </Panel3D>
   );
 
-  const metalOptions = (
+  const metalFinishOptions = (
     <Panel3D position={isMobile ? [0, 0.25, 0] : [0.3, -0.2, 0]} width={0.7} height={0.25} scale={isMobile ? 0.8 : 1}>
-      <ColorSwatch3D position={[-0.22, 0, 0]} color={METAL_COLORS['Bronze']} name="Bronze" active={metalColor === 'Bronze'} onClick={() => setMetalColor('Bronze')} />
-      <ColorSwatch3D position={[0, 0, 0]} color={METAL_COLORS['Stainless Steel']} name="Stainless Steel" active={metalColor === 'Stainless Steel'} onClick={() => setMetalColor('Stainless Steel')} />
-      <ColorSwatch3D position={[0.22, 0, 0]} color={METAL_COLORS['Copper']} name="Copper" active={metalColor === 'Copper'} onClick={() => setMetalColor('Copper')} />
+      {Object.entries(METAL_FINISH).map(([name, colorHex], i, arr) => (
+        <ColorSwatch3D 
+          key={name}
+          position={[getSwatchX(i, arr.length), 0, 0]} 
+          color={colorHex} 
+          name={name} 
+          active={metalFinish === name} 
+          onClick={() => setMetalFinish(name)} 
+        />
+      ))}
     </Panel3D>
   );
 
@@ -135,9 +154,16 @@ export default function ConfiguratorCanvas({
       
       {handles !== 'none' && (
         <group position={[0.2, 0, 0]}>
-          <ColorSwatch3D position={[0, 0.2, 0]} color={METAL_COLORS['Bronze']} name="Bronze" active={handleColor === 'Bronze'} onClick={() => setHandleColor('Bronze')} />
-          <ColorSwatch3D position={[0, 0, 0]} color={METAL_COLORS['Stainless Steel']} name="Stainless Steel" active={handleColor === 'Stainless Steel'} onClick={() => setHandleColor('Stainless Steel')} />
-          <ColorSwatch3D position={[0, -0.2, 0]} color={METAL_COLORS['Copper']} name="Copper" active={handleColor === 'Copper'} onClick={() => setHandleColor('Copper')} />
+          {Object.entries(METAL_COLORS).map(([name, colorHex], i, arr) => (
+            <ColorSwatch3D 
+              key={name}
+              position={[0, getSwatchY(i, arr.length), 0]} 
+              color={colorHex} 
+              name={name} 
+              active={handleColor === name} 
+              onClick={() => setHandleColor(name)} 
+            />
+          ))}
         </group>
       )}
     </Panel3D>
@@ -152,16 +178,23 @@ export default function ConfiguratorCanvas({
       </group>
       {nameplate !== 'none' && (
         <group position={[0.2, 0, 0]}>
-          <ColorSwatch3D position={[0, 0.15, 0]} color={METAL_COLORS['Bronze']} name="Bronze" active={nameplateColor === 'Bronze'} onClick={() => setNameplateColor('Bronze')} />
-          <ColorSwatch3D position={[0, 0, 0]} color={METAL_COLORS['Stainless Steel']} name="Stainless Steel" active={nameplateColor === 'Stainless Steel'} onClick={() => setNameplateColor('Stainless Steel')} />
-          <ColorSwatch3D position={[0, -0.15, 0]} color={METAL_COLORS['Copper']} name="Copper" active={nameplateColor === 'Copper'} onClick={() => setNameplateColor('Copper')} />
+          {Object.entries(METAL_COLORS).map(([name, colorHex], i, arr) => (
+            <ColorSwatch3D 
+              key={name}
+              position={[0, getNameplateY(i, arr.length), 0]} 
+              color={colorHex} 
+              name={name} 
+              active={nameplateColor === name} 
+              onClick={() => setNameplateColor(name)} 
+            />
+          ))}
         </group>
       )}
     </Panel3D>
   );
 
   const ornamentOptions = (
-    <Panel3D position={isMobile ? [0, 0.25, 0] : [0.25, 0.02, 0]} width={ornament !== 'none' ? 0.9 : 0.45} height={0.7} scale={isMobile ? 0.35 : 0.25}>
+    <Panel3D position={isMobile ? [0, 0.25, 0] : [0.25, 0.02, 0]} width={ornament !== 'none' ? 0.9 : 0.45} height={1.1} scale={isMobile ? 0.35 : 0.25}>
       <group position={ornament !== 'none' ? [-0.2, 0, 0] : [0, 0, 0]}>
         <TextButton3D position={[0, 0.2, 0]} text="No Ornament" active={ornament === 'none'} onClick={() => setOrnament('none')} />
         <TextButton3D position={[0, 0.05, 0]} text="Cross" active={ornament === 'cross'} onClick={() => setOrnament('cross')} />
@@ -170,9 +203,16 @@ export default function ConfiguratorCanvas({
       </group>
       {ornament !== 'none' && (
         <group position={[0.2, 0, 0]}>
-          <ColorSwatch3D position={[0, 0.2, 0]} color={METAL_COLORS['Bronze']} name="Bronze" active={ornamentColor === 'Bronze'} onClick={() => setOrnamentColor('Bronze')} />
-          <ColorSwatch3D position={[0, 0, 0]} color={METAL_COLORS['Stainless Steel']} name="Stainless Steel" active={ornamentColor === 'Stainless Steel'} onClick={() => setOrnamentColor('Stainless Steel')} />
-          <ColorSwatch3D position={[0, -0.2, 0]} color={METAL_COLORS['Copper']} name="Copper" active={ornamentColor === 'Copper'} onClick={() => setOrnamentColor('Copper')} />
+          {Object.entries(METAL_COLORS).map(([name, colorHex], i, arr) => (
+            <ColorSwatch3D 
+              key={name}
+              position={[0, getSwatchY(i, arr.length), 0]} 
+              color={colorHex} 
+              name={name} 
+              active={ornamentColor === name} 
+              onClick={() => setOrnamentColor(name)} 
+            />
+          ))}
         </group>
       )}
     </Panel3D>
@@ -196,19 +236,19 @@ export default function ConfiguratorCanvas({
         <Suspense fallback={null}>
           <CoffinModel 
             coffinMaterial={coffinMaterial} 
-            metalColor={METAL_COLORS[metalColor] || METAL_COLORS['Bronze']} 
-            handleColor={METAL_COLORS[handleColor] || METAL_COLORS['Bronze']}
+            metalColor={METAL_FINISH[metalFinish] || METAL_FINISH['Copper']} 
+            handleColor={METAL_COLORS[handleColor] || METAL_COLORS['Gold']}
             handles={handles} 
             ornament={ornament} 
             nameplate={nameplate}
-            nameplateColor={METAL_COLORS[nameplateColor] || METAL_COLORS['Bronze']}
-            ornamentColor={METAL_COLORS[ornamentColor] || METAL_COLORS['Bronze']}
+            nameplateColor={METAL_COLORS[nameplateColor] || METAL_COLORS['Gold']}
+            ornamentColor={METAL_COLORS[ornamentColor] || METAL_COLORS['Gold']}
             decalImage={decalImage}
             activeHotspot={activeHotspot}
             setActiveHotspot={setActiveHotspot}
             isExporting={isExporting}
             materialOptions={materialOptions}
-            metalOptions={metalOptions}
+            metalOptions={metalFinishOptions}
             handleOptions={handleOptions}
             nameplateOptions={nameplateOptions}
             ornamentOptions={ornamentOptions}

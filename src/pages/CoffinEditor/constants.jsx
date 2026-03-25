@@ -12,6 +12,20 @@ export const METAL_COLORS = {
   'Copper': '#B87333',
 };
 
+export const METAL_FINISH = {
+  'Bronze': '#CD7F32',
+  'Stainless Steel': '#C0C0C0',
+  'Copper': '#B87333',
+};
+
+// Add this to control Vault Body colors and material references in one place!
+export const VAULT_MATERIALS = {
+  'White Marble': { color: '#FFFFFF', matName: 'White_Marble' },
+  'Black Marble': { color: '#111111', matName: 'Black_Marble' },
+  'Rose Granite': { color: '#73000A', matName: 'rose-granite-polymer' },
+  'Grey Granite': { color: '#808080', matName: 'Grey_Granite' },
+};
+
 export const selectStyles = {
   width: '100%',
   padding: '0.8rem',

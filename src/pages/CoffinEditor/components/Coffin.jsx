@@ -2,9 +2,11 @@ import React, { useMemo } from 'react'
 import { useGLTF, Billboard, Text } from '@react-three/drei'
 import * as THREE from 'three'
 import CoffinDecal from './CoffinDecal'
+import { VAULT_MATERIALS } from '../constants'
 
-function Hotspot({ position, label, active, onClick, children, isExporting }) {
+function Hotspot({ position, label, active, onClick, children, isExporting, anyActive }) {
   if (isExporting) return null; // Hides the 3D buttons temporarily for the PDF screenshot
+  if (anyActive && !active) return null; // Hides everything else if another hotspot is open
   return (
     <group position={position}>
       <Billboard follow={true} lockX={false} lockY={false} lockZ={false}>
@@ -70,24 +72,13 @@ export function Model({
 
   // Body Material Logic
   const activeBodyMat = useMemo(() => {
-    if (coffinMaterial === 'Black Marble' && materials.Black_Marble) {
-      const mat = materials.Black_Marble.clone();
-      mat.metalness = 0.1; 
-      mat.roughness = 0.2; 
-      return mat;
-    }
-    if (coffinMaterial === 'Rose Granite' && materials['rose-granite-polymer']) {
-      const mat = materials['rose-granite-polymer'].clone();
-      mat.metalness = 0.1; 
-      mat.roughness = 0.2; 
-      return mat;
-    }
-    if (coffinMaterial === 'White Marble' && materials.White_Marble) {
-      const mat = materials.White_Marble.clone();
-      mat.metalness = 0.1; 
-      mat.roughness = 0.2; 
-      return mat;
-    }
+    const selectedMat = VAULT_MATERIALS[coffinMaterial] || VAULT_MATERIALS['White Marble'];
+    const sourceMat = materials[selectedMat.matName] || materials.White_Marble;
+    
+    const mat = sourceMat.clone();
+    mat.metalness = 0.1; 
+    mat.roughness = 0.2; 
+    return mat;
   }, [coffinMaterial, materials]);
 
   // Metal Material Logic 
@@ -126,7 +117,7 @@ export function Model({
 
   // Ornament Material Logic
   const ornamentMat = useMemo(() => {
-    const m = materials['Brushed used metal silver'].clone();
+    const m = materials['Brushed metal.001'].clone();
     m.color.set(ornamentColor); 
     m.metalness = 1.0;
     m.roughness = 0.35; 
@@ -148,6 +139,7 @@ export function Model({
           position={[0, 0.4, 0]} 
           label="Vault Material" 
           active={activeHotspot === 'material'} 
+          anyActive={!!activeHotspot}
           onClick={() => setActiveHotspot(activeHotspot === 'material' ? null : 'material')}
           isExporting={isExporting}
         >
@@ -157,6 +149,7 @@ export function Model({
 
       <mesh geometry={nodes.Cube.geometry} material={materials.Black_Marble} position={[0, 0, -0.077]} scale={0.009} />
       <mesh geometry={nodes.Cube001.geometry} material={materials['rose-granite-polymer']} position={[0.031, 0, -0.077]} scale={0.009} />
+      <mesh geometry={nodes.Cube002.geometry} material={materials.Grey_Granite} position={[0.079, 0, -0.077]} scale={0.009} />
       {/* Exterior Metal Trim & Decal Group */}
       <group 
         position={[0.002, 0.108, 0.582]} 
@@ -175,6 +168,7 @@ export function Model({
           position={[0, 0.05, 0.2]} 
           label="Metal Finish" 
           active={activeHotspot === 'metal'} 
+          anyActive={!!activeHotspot}
           onClick={() => setActiveHotspot(activeHotspot === 'metal' ? null : 'metal')}
           isExporting={isExporting}
         >
@@ -191,6 +185,7 @@ export function Model({
           position={[0.6, 0.3, 0.3]} 
           label="Handles & Hardware" 
           active={activeHotspot === 'handles'} 
+          anyActive={!!activeHotspot}
           onClick={() => setActiveHotspot(activeHotspot === 'handles' ? null : 'handles')}
           isExporting={isExporting}
         >
@@ -240,6 +235,7 @@ export function Model({
           position={[-0.826, 0.19, 0.586]} 
           label="Nameplate" 
           active={activeHotspot === 'nameplate'} 
+          anyActive={!!activeHotspot}
           onClick={() => setActiveHotspot(activeHotspot === 'nameplate' ? null : 'nameplate')}
           isExporting={isExporting}
         >
@@ -259,6 +255,7 @@ export function Model({
           position={[0.06, 0.15, 0.62]} 
           label="Ornaments" 
           active={activeHotspot === 'ornament'} 
+          anyActive={!!activeHotspot}
           onClick={() => setActiveHotspot(activeHotspot === 'ornament' ? null : 'ornament')}
           isExporting={isExporting}
         >
