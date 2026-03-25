@@ -109,9 +109,10 @@ export default function ConfiguratorCanvas({
 
   // --- 3D Popup UIs ---
   const materialOptions = (
-    <Panel3D position={isMobile ? [0, 0.25, 0] : [0.2, 0, 0]} width={0.5} height={0.25} scale={isMobile ? 0.8 : 1}>
-      <ColorSwatch3D position={[-0.12, 0, 0]} color="#FFFFFF" name="White Marble" active={coffinMaterial === 'White Marble'} onClick={() => setCoffinMaterial('White Marble')} />
-      <ColorSwatch3D position={[0.12, 0, 0]} color="#111111" name="Black Marble" active={coffinMaterial === 'Black Marble'} onClick={() => setCoffinMaterial('Black Marble')} />
+    <Panel3D position={isMobile ? [0, 0.25, 0] : [0.2, 0, 0]} width={0.7} height={0.25} scale={isMobile ? 0.8 : 1}>
+      <ColorSwatch3D position={[-0.22, 0, 0]} color="#FFFFFF" name="White Marble" active={coffinMaterial === 'White Marble'} onClick={() => setCoffinMaterial('White Marble')} />
+      <ColorSwatch3D position={[0.22, 0, 0]} color="#111111" name="Black Marble" active={coffinMaterial === 'Black Marble'} onClick={() => setCoffinMaterial('Black Marble')} />
+      <ColorSwatch3D position={[0, 0, 0]} color="#73000A" name="Rose Granite" active={coffinMaterial === 'Rose Granite'} onClick={() => setCoffinMaterial('Rose Granite')} />
     </Panel3D>
   );
 

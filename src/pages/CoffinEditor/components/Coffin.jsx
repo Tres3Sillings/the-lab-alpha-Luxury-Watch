@@ -76,7 +76,18 @@ export function Model({
       mat.roughness = 0.2; 
       return mat;
     }
-    return materials.White_Marble;
+    if (coffinMaterial === 'Rose Granite' && materials['rose-granite-polymer']) {
+      const mat = materials['rose-granite-polymer'].clone();
+      mat.metalness = 0.1; 
+      mat.roughness = 0.2; 
+      return mat;
+    }
+    if (coffinMaterial === 'White Marble' && materials.White_Marble) {
+      const mat = materials.White_Marble.clone();
+      mat.metalness = 0.1; 
+      mat.roughness = 0.2; 
+      return mat;
+    }
   }, [coffinMaterial, materials]);
 
   // Metal Material Logic 
@@ -104,7 +115,7 @@ export function Model({
 
   // Nameplate Material Logic
   const nameplateMat = useMemo(() => {
-    const m = materials['Brushed used metal silver'].clone();
+    const m = materials['Brushed metal.001'].clone();
     m.color.set(nameplateColor); 
     m.metalness = 1.0;
     m.roughness = 0.35; 
@@ -145,7 +156,7 @@ export function Model({
       </mesh>
 
       <mesh geometry={nodes.Cube.geometry} material={materials.Black_Marble} position={[0, 0, -0.077]} scale={0.009} />
-
+      <mesh geometry={nodes.Cube001.geometry} material={materials['rose-granite-polymer']} position={[0.031, 0, -0.077]} scale={0.009} />
       {/* Exterior Metal Trim & Decal Group */}
       <group 
         position={[0.002, 0.108, 0.582]} 
