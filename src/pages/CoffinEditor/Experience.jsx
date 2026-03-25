@@ -121,7 +121,7 @@ export default function Experience() {
       {/* Floating Logo */}
       <div className="absolute top-8 left-8 z-20 pointer-events-none">
         <h1 className="text-3xl font-black tracking-tighter uppercase italic mb-1 text-gray-900">Trigard</h1>
-        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Premium Coffin Configurator</p>
+        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Premium Vault Configurator</p>
       </div>
 
       {/* 3D Viewer Area */}
@@ -129,14 +129,14 @@ export default function Experience() {
         <div className="absolute top-8 right-8 z-10 flex gap-4">
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-3 bg-white border border-gray-200 px-6 py-3 rounded-full shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all text-sm font-bold uppercase tracking-wider text-gray-900"
+            className="flex items-center gap-3 !bg-white border border-gray-200 px-6 py-3 rounded-full shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all text-sm font-bold uppercase tracking-wider text-gray-900"
           >
             <Palette size={18} className="text-blue-600" />
             <span>Custom Wrap</span>
           </button>
           <button 
             onClick={handleDownloadPdf}
-            className="flex items-center gap-3 bg-gray-900 border border-gray-900 px-6 py-3 rounded-full shadow-lg hover:bg-black hover:-translate-y-0.5 transition-all text-sm font-bold uppercase tracking-wider text-white"
+            className="flex items-center gap-3 !bg-white border border-gray-200 px-6 py-3 rounded-full shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all text-sm font-bold uppercase tracking-wider text-gray-900"
           >
             <Download size={18} className="text-blue-400" />
             <span>Export PDF</span>

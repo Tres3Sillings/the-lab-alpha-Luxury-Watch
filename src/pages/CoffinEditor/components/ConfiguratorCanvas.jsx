@@ -99,9 +99,9 @@ export default function ConfiguratorCanvas({
     } else if (activeHotspot === 'handles') {
       controls.setLookAt(isMobile ? 1.2 : 0.933, isMobile ? 0.6 : 0.471, isMobile ? 1.1 : 0.788, 0.508, 0.258, 0.363, true);
     } else if (activeHotspot === 'nameplate') {
-      controls.setLookAt(isMobile ? -0.4 : -0.189, isMobile ? 0.8 : 0.650, isMobile ? 1.2 : 0.942, -0.539, 0.218, 0.654, true);
+      controls.setLookAt(isMobile ? -0.526 : -0.315, isMobile ? 0.8 : 0.650, isMobile ? 1.2 : 0.942, -0.665, 0.218, 0.654, true);
     } else if (activeHotspot === 'ornament') {
-      controls.setLookAt(isMobile ? 0 : 0, isMobile ? 1.5 : 1.2, isMobile ? 1.3 : 1.0, 0, 0.4, 0.2, true);
+      controls.setLookAt(isMobile ? 0 : 0.572, isMobile ? 1.5 : 0.475, isMobile ? 1.3 : 1.0, 0.3, 0.1, 0.49, true);
     } else {
       controls.setLookAt(isMobile ? 2.5 : 2.02, isMobile ? 1.1 : 0.86, isMobile ? 2.4 : 1.68, 0, 0, 0, true);
     }
@@ -143,7 +143,7 @@ export default function ConfiguratorCanvas({
   );
 
   const nameplateOptions = (
-    <Panel3D position={isMobile ? [0, 0.25, 0] : [-0.35, 0, 0]} width={nameplate !== 'none' ? 0.9 : 0.45} height={0.55} scale={isMobile ? 0.35 : 0.25}>
+    <Panel3D position={isMobile ? [0, 0.25, 0] : [-0.476, 0, 0]} width={nameplate !== 'none' ? 0.9 : 0.45} height={0.55} scale={isMobile ? 0.35 : 0.25}>
       <group position={nameplate !== 'none' ? [-0.2, 0, 0] : [0, 0, 0]}>
         <TextButton3D position={[0, 0.15, 0]} text="No Nameplate" active={nameplate === 'none'} onClick={() => setNameplate('none')} />
         <TextButton3D position={[0, 0, 0]} text="Standard" active={nameplate === 'standard'} onClick={() => setNameplate('standard')} />
@@ -160,17 +160,18 @@ export default function ConfiguratorCanvas({
   );
 
   const ornamentOptions = (
-    <Panel3D position={isMobile ? [0, 0.25, 0] : [0.35, 0.2, 0]} width={ornament !== 'none' ? 0.9 : 0.45} height={0.55} scale={isMobile ? 0.35 : 0.25}>
+    <Panel3D position={isMobile ? [0, 0.25, 0] : [0.25, 0.02, 0]} width={ornament !== 'none' ? 0.9 : 0.45} height={0.7} scale={isMobile ? 0.35 : 0.25}>
       <group position={ornament !== 'none' ? [-0.2, 0, 0] : [0, 0, 0]}>
-        <TextButton3D position={[0, 0.15, 0]} text="No Ornament" active={ornament === 'none'} onClick={() => setOrnament('none')} />
-        <TextButton3D position={[0, 0, 0]} text="Cross" active={ornament === 'cross'} onClick={() => setOrnament('cross')} />
-        <TextButton3D position={[0, -0.15, 0]} text="Rose" active={ornament === 'rose'} onClick={() => setOrnament('rose')} />
+        <TextButton3D position={[0, 0.2, 0]} text="No Ornament" active={ornament === 'none'} onClick={() => setOrnament('none')} />
+        <TextButton3D position={[0, 0.05, 0]} text="Cross" active={ornament === 'cross'} onClick={() => setOrnament('cross')} />
+        <TextButton3D position={[0, -0.1, 0]} text="Rose" active={ornament === 'rose'} onClick={() => setOrnament('rose')} />
+        <TextButton3D position={[0, -0.25, 0]} text="Wreath" active={ornament === 'wreath'} onClick={() => setOrnament('wreath')} />
       </group>
       {ornament !== 'none' && (
         <group position={[0.2, 0, 0]}>
-          <ColorSwatch3D position={[0, 0.15, 0]} color={METAL_COLORS['Bronze']} name="Bronze" active={ornamentColor === 'Bronze'} onClick={() => setOrnamentColor('Bronze')} />
+          <ColorSwatch3D position={[0, 0.2, 0]} color={METAL_COLORS['Bronze']} name="Bronze" active={ornamentColor === 'Bronze'} onClick={() => setOrnamentColor('Bronze')} />
           <ColorSwatch3D position={[0, 0, 0]} color={METAL_COLORS['Stainless Steel']} name="Stainless Steel" active={ornamentColor === 'Stainless Steel'} onClick={() => setOrnamentColor('Stainless Steel')} />
-          <ColorSwatch3D position={[0, -0.15, 0]} color={METAL_COLORS['Copper']} name="Copper" active={ornamentColor === 'Copper'} onClick={() => setOrnamentColor('Copper')} />
+          <ColorSwatch3D position={[0, -0.2, 0]} color={METAL_COLORS['Copper']} name="Copper" active={ornamentColor === 'Copper'} onClick={() => setOrnamentColor('Copper')} />
         </group>
       )}
     </Panel3D>

@@ -52,6 +52,7 @@ export function Model({
   handleColor = '#2C2C2C', 
   handles = 'standard', 
   nameplate = 'standard', 
+  ornament = 'none',
   nameplateColor = '#2C2C2C',
   ornamentColor = '#2C2C2C',
   decalImage = null, 
@@ -131,11 +132,10 @@ export function Model({
         material={activeBodyMat} 
         castShadow 
         receiveShadow 
-        onClick={(e) => { e.stopPropagation(); setActiveHotspot('material'); }}
       >
         <Hotspot 
           position={[0, 0.4, 0]} 
-          label="Coffin Material" 
+          label="Vault Material" 
           active={activeHotspot === 'material'} 
           onClick={() => setActiveHotspot(activeHotspot === 'material' ? null : 'material')}
           isExporting={isExporting}
@@ -150,7 +150,6 @@ export function Model({
       <group 
         position={[0.002, 0.108, 0.582]} 
         rotation={[0.602, 0, 0]}
-        onClick={(e) => { e.stopPropagation(); setActiveHotspot('metal'); }}
       >
         <mesh 
           geometry={nodes.Metal.geometry} 
@@ -176,7 +175,7 @@ export function Model({
       <mesh geometry={nodes.Metal_Inside.geometry} material={metalMat} position={[0, 0.024, -0.423]} scale={[0.914, 0.173, 0.325]} castShadow />
 
       {/* Handles Group */}
-      <group onClick={(e) => { e.stopPropagation(); setActiveHotspot('handles'); }}>
+      <group>
         <Hotspot 
           position={[0.6, 0.3, 0.3]} 
           label="Handles & Hardware" 
@@ -225,9 +224,9 @@ export function Model({
       </group>
 
       {/* Nameplates */}
-      <group onClick={(e) => { e.stopPropagation(); setActiveHotspot('nameplate'); }}>
+      <group>
         <Hotspot 
-          position={[-0.7, 0.19, 0.586]} 
+          position={[-0.826, 0.19, 0.586]} 
           label="Nameplate" 
           active={activeHotspot === 'nameplate'} 
           onClick={() => setActiveHotspot(activeHotspot === 'nameplate' ? null : 'nameplate')}
@@ -244,9 +243,9 @@ export function Model({
       </group>
 
       {/* Ornaments */}
-      <group onClick={(e) => { e.stopPropagation(); setActiveHotspot('ornament'); }}>
+      <group>
         <Hotspot 
-          position={[0, 0.35, 0.35]} 
+          position={[0.06, 0.15, 0.62]} 
           label="Ornaments" 
           active={activeHotspot === 'ornament'} 
           onClick={() => setActiveHotspot(activeHotspot === 'ornament' ? null : 'ornament')}
@@ -254,7 +253,15 @@ export function Model({
         >
           {ornamentOptions}
         </Hotspot>
-        {/* Note: Ornament meshes will be rendered here in the future, using ornamentMat */}
+        {ornament === 'rose' && (
+          <mesh geometry={nodes.Rose_Silver_Plastic.geometry} material={ornamentMat} position={[0.229, 0.141, 0.587]} rotation={[-0.959, -0.1, 0.07]} scale={0.164} castShadow />
+        )}
+        {ornament === 'cross' && (
+          <mesh geometry={nodes.Plated_Metal_Crucifixe.geometry} material={ornamentMat} position={[0.229, 0.137, 0.596]} rotation={[3.142, 1.568, -2.538]} scale={0.164} castShadow />
+        )}
+        {ornament === 'wreath' && (
+          <mesh geometry={nodes.Wreath_Plated.geometry} material={ornamentMat} position={[0.229, 0.122, 0.58]} rotation={[-1.034, 1.535, 1.637]} scale={0.164} castShadow />
+        )}
       </group>
     </group>
   )
