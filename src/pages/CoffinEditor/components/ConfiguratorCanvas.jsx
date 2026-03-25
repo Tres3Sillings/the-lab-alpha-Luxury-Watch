@@ -114,7 +114,7 @@ export default function ConfiguratorCanvas({
 
   // --- 3D Popup UIs ---
   const materialOptions = (
-    <Panel3D position={isMobile ? [0, 0.25, 0] : [0.2, 0, 0]} width={0.7} height={0.25} scale={isMobile ? 0.8 : 1}>
+    <Panel3D position={isMobile ? [0, 0.25, 0] : [0.2, 0, 0]} width={0.9} height={0.25} scale={isMobile ? 0.8 : 1}>
       {Object.entries(VAULT_MATERIALS).map(([name, data], i, arr) => (
         <ColorSwatch3D 
           key={name}

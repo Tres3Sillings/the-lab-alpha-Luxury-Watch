@@ -73,9 +73,21 @@ export function Model({
   // Body Material Logic
   const activeBodyMat = useMemo(() => {
     const selectedMat = VAULT_MATERIALS[coffinMaterial] || VAULT_MATERIALS['White Marble'];
-    const sourceMat = materials[selectedMat.matName] || materials.White_Marble;
+    let sourceMat = materials[selectedMat.matName];
+    
+    if (!sourceMat) {
+      console.warn(`Material "${selectedMat.matName}" is missing from the GLB! Make sure the newest Coffin-transformed.glb is inside your public/ folder.`);
+      sourceMat = materials.White_Marble;
+    }
     
     const mat = sourceMat.clone();
+
+    if (selectedMat.tint) {
+      mat.color.set(selectedMat.color);
+    } else {
+      mat.color.set('#FFFFFF'); // White resets the tint to show the raw texture
+    }
+
     mat.metalness = 0.1; 
     mat.roughness = 0.2; 
     return mat;

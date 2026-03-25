@@ -22,8 +22,8 @@ export const METAL_FINISH = {
 export const VAULT_MATERIALS = {
   'White Marble': { color: '#FFFFFF', matName: 'White_Marble' },
   'Black Marble': { color: '#111111', matName: 'Black_Marble' },
-  'Rose Granite': { color: '#73000A', matName: 'rose-granite-polymer' },
-  'Grey Granite': { color: '#808080', matName: 'Grey_Granite' },
+  'Rose Granite': { color: '#9A5B5B', matName: 'Grey_Granite', tint: true },
+  'Grey Granite': { color: '#808080', matName: 'Grey_Granite', tint: true },
 };
 
 export const selectStyles = {
