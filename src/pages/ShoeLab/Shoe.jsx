@@ -31,7 +31,7 @@ function ShoeLoader() {
 
 // --- 2. MODEL (With Tap-to-Select Logic) ---
 function Shoethelab({ partColors, onPartClick, ...props }) {
-  const { nodes, materials } = useGLTF('/Shoethelab.glb')
+  const { nodes, materials } = useGLTF('/Shoethelab-transformed.glb')
   const meshRefs = useRef({})
 
   useFrame((state, delta) => {
