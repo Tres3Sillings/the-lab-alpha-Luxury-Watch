@@ -1,205 +1,258 @@
-import React, { useEffect, useRef, useMemo } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
-import { easing } from 'maath'
+import React, { Suspense, useState, useEffect, useRef } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { SheetProvider, PerspectiveCamera, editable as e } from '@theatre/r3f'
+import { getProject } from '@theatre/core'
+import studio from '@theatre/studio'
+import extension from '@theatre/r3f/dist/extension'
+import { useNavigate } from 'react-router-dom'
 import * as THREE from 'three'
-import { Model } from './components/TheLabHub_V2.jsx'
+import { Model as CuriosityModel } from './Components/01-CURIOSITY.jsx'
+import bgImageUrl from './Components/BG-Image.webp'
+import { Environment, useTexture } from '@react-three/drei'
+import './Home.css'
 
-// --- BACKGROUND SHADER DEFINITION ---
-const BackgroundShader = {
-  uniforms: {
-    uTime: { value: 0 },
-    uColor: { value: new THREE.Color("#020202") },
-    uAccent: { value: new THREE.Color("#00f2ff") },
-  },
-  vertexShader: `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `,
-  fragmentShader: `
-    uniform float uTime;
-    uniform vec3 uColor;
-    uniform vec3 uAccent;
-    varying vec2 vUv;
-
-    float noise(vec2 st) {
-      return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
-    }
-
-    void main() {
-      vec2 uv = vUv;
-      float n = noise(uv + uTime * 0.02);
-      float dist = distance(uv, vec2(0.5));
-      
-      // Deep radial glow
-      vec3 color = mix(uAccent * 0.04, uColor, dist * 1.4);
-      
-      // CRT Grain
-      color += n * 0.015;
-
-      gl_FragColor = vec4(color, 1.0);
-    }
-  `
+// Initialize Theatre.js studio only in development environment
+if (import.meta.env.DEV) {
+  studio.initialize()
+  studio.extend(extension)
 }
 
-const PROJECT_MAP = {
-  'shoe':       { cam: 'cam_01', target: 'HitBox_01' },
-  'watch':      { cam: 'cam_02', target: 'HitBox_02' },
-  'project_03': { cam: 'cam_03', target: 'HitBox_03' },
-  'project_04': { cam: 'cam_04', target: 'HitBox_04' },
-  'project_05': { cam: 'cam_05', target: 'HitBox_05' },
-  'project_06': { cam: 'cam_06', target: 'HitBox_06' },
-  'project_07': { cam: 'cam_07', target: 'HitBox_07' },
-  'project_08': { cam: 'cam_08', target: 'HitBox_08' },
-}
+const project = getProject('Curiosity Project')
+const sheet = project.sheet('Curiosity Scene')
 
-function CameraRig({ isStarted, activeProject }) {
-  const { scene } = useThree()
+// Sky Plane background component using the new BG-Image.webp asset
+function EnvironmentBackground() {
+  const texture = useTexture(bgImageUrl)
   
-  const pos_Start = useMemo(() => new THREE.Vector3(-0.92, 18.96, 0.05), [])
-  const look_Start = useMemo(() => new THREE.Vector3(-0.92, 0, 0.05), [])
-  const pos_Hub = useMemo(() => new THREE.Vector3(0.7, 2.24, 0.19), [])
-  const look_Hub = useMemo(() => new THREE.Vector3(3.51, 1.2, 0.37), [])
-
-  const targetPos = useRef(new THREE.Vector3().copy(pos_Start))
-  const targetLook = useRef(new THREE.Vector3().copy(look_Start))
-  const targetQuat = useRef(new THREE.Quaternion())
-  const m = useRef(new THREE.Matrix4())
-
-  useFrame((state, delta) => {
-    let foundCam = null
-    let foundTarget = null
-
-    if (activeProject && PROJECT_MAP[activeProject]) {
-      const names = PROJECT_MAP[activeProject]
-      foundCam = scene.getObjectByName(names.cam)
-      foundTarget = scene.getObjectByName(names.target)
-    }
-
-    if (foundCam && foundTarget) {
-      foundCam.updateMatrixWorld()
-      foundTarget.updateMatrixWorld()
-      foundCam.getWorldPosition(targetPos.current)
-      foundTarget.getWorldPosition(targetLook.current)
-    } 
-    else if (!isStarted) {
-      const t = state.clock.getElapsedTime()
-      targetPos.current.set(
-        pos_Start.x + Math.sin(t * 0.2) * 0.5, 
-        pos_Start.y + Math.cos(t * 0.2) * 0.2, 
-        pos_Start.z + Math.cos(t * 0.2) * 0.5
-      )
-      targetLook.current.copy(look_Start)
-    } 
-    else {
-      targetPos.current.copy(pos_Hub)
-      targetLook.current.copy(look_Hub)
-    }
-
-    m.current.lookAt(state.camera.position, targetLook.current, state.camera.up)
-    targetQuat.current.setFromRotationMatrix(m.current)
-
-    easing.damp3(state.camera.position, targetPos.current, 0.5, delta)
-    easing.dampQ(state.camera.quaternion, targetQuat.current, 0.5, delta)
-  })
-
-  return null
+  return (
+    <e.mesh theatreKey="Sky Plane" position={[-0.5, 1.8, -8]} scale={[16, 9, 1]}>
+      <planeGeometry />
+      {/* depthWrite={false} keeps the plane from blocking render buffers; toneMapped={false} preserves original image colors */}
+      <meshBasicMaterial map={texture} depthWrite={false} toneMapped={false} />
+    </e.mesh>
+  )
 }
 
-export default function Experience({ isStarted, activeProject, onProjectSelect, rotationY, setRotationY }) {
+// Camera Rig component to apply subtle camera parallax tracking the mouse cursor
+function CameraRig({ children }) {
   const groupRef = useRef()
-  const orbitMeshRef = useRef()
-  const shaderRef = useRef()
-  const isDragging = useRef(false)
-  const previousX = useRef(0)
-  const { gl, scene } = useThree()
-
-  useEffect(() => {
-    const orbit = scene.getObjectByName('Orbit')
-    if (orbit) orbitMeshRef.current = orbit
-  }, [scene])
-
-  useEffect(() => {
-    const canvas = gl.domElement 
-    const handleScroll = (e) => {
-      if (!activeProject && isStarted) setRotationY((prev) => prev + e.deltaY * 0.0005)
-    }
-    const handlePointerDown = (e) => {
-      if (activeProject || !isStarted) return 
-      isDragging.current = true
-      previousX.current = e.clientX
-    }
-    const handlePointerMove = (e) => {
-      if (!isDragging.current || activeProject || !isStarted) return
-      const deltaX = e.clientX - previousX.current
-      setRotationY((prev) => prev - deltaX * 0.005)
-      previousX.current = e.clientX
-    }
-    const handlePointerUp = () => { isDragging.current = false }
-    
-    window.addEventListener('wheel', handleScroll)
-    canvas.addEventListener('pointerdown', handlePointerDown)
-    window.addEventListener('pointermove', handlePointerMove)
-    window.addEventListener('pointerup', handlePointerUp)
-    return () => {
-      window.removeEventListener('wheel', handleScroll)
-      canvas.removeEventListener('pointerdown', handlePointerDown)
-      window.removeEventListener('pointermove', handlePointerMove)
-      window.removeEventListener('pointerup', handlePointerUp)
-    }
-  }, [activeProject, isStarted, gl, setRotationY])
-
+  
   useFrame((state, delta) => {
-    const t = state.clock.getElapsedTime()
-
-    // Background Shader Uniforms
-    if (shaderRef.current) {
-      shaderRef.current.uniforms.uTime.value = t
-    }
-
-    // 1. Smooth Hub Rotation
     if (groupRef.current) {
-      easing.dampE(groupRef.current.rotation, [0, rotationY, 0], 0.25, delta)
-    }
-
-    // 2. THE ORBIT ANIMATION
-    if (orbitMeshRef.current) {
-      const rotationSpeed = activeProject ? 0.3 : 0.15
-      orbitMeshRef.current.rotation.y += delta * rotationSpeed
-      orbitMeshRef.current.rotation.z = Math.sin(t * 0.4) * 0.05
+      // Calculate target horizontal and vertical offsets based on mouse position (-1 to 1)
+      const targetX = state.pointer.x * 0.15
+      const targetY = state.pointer.y * 0.1
       
-      const pulseSpeed = activeProject ? 3.0 : 1.0
-      const scaleBase = activeProject ? 1.05 : 1.0
-      const s = scaleBase + Math.sin(t * pulseSpeed) * 0.02
-      orbitMeshRef.current.scale.set(s, s, s)
+      // Smoothly interpolate rig positions using linear interpolation (lerp)
+      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, delta * 4)
+      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, targetY, delta * 4)
+      
+      // Add subtle camera rotation offsets (pan and tilt) matching cursor direction
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, -state.pointer.x * 0.05, delta * 4)
+      groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, state.pointer.y * 0.04, delta * 4)
     }
   })
+  
+  return <group ref={groupRef}>{children}</group>
+}
+
+export default function Experience() {
+  const navigate = useNavigate()
+  const [selectedSticker, setSelectedSticker] = useState(null)
+
+  // Sync selected element state with URL hash
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.toLowerCase()
+      if (hash === '#notebook') {
+        setSelectedSticker('Notebook')
+      } else if (hash === '#cup') {
+        setSelectedSticker('Cup')
+      } else if (hash === '#calculator') {
+        setSelectedSticker('Calculator')
+      } else if (hash === '#pc') {
+        setSelectedSticker('PC')
+      } else {
+        const match = hash.match(/^#sticker([1-5])$/i)
+        if (match) {
+          // Map back to Capitalized Sticker name for state consistency
+          setSelectedSticker(`Sticker${match[1]}`)
+        } else {
+          setSelectedSticker(null)
+        }
+      }
+    }
+
+    // Run on initial mount (in case they deep-linked straight to a hash)
+    handleHashChange()
+
+    window.addEventListener('hashchange', handleHashChange)
+    return () => window.removeEventListener('hashchange', handleHashChange)
+  }, [])
+
+  // Trigger navigation by changing hash
+  const handleStickerClick = (stickerName) => {
+    if (stickerName) {
+      window.location.hash = stickerName.toLowerCase()
+    }
+  }
+
+  // Clear hash and go back to base home view
+  const handleBackToHome = () => {
+    // Clear URL hash without trigger page layout scroll jumps
+    window.history.pushState('', document.title, window.location.pathname + window.location.search)
+    setSelectedSticker(null)
+  }
+
+  // Timeline configuration mapping portfolio items to their corresponding routes
+  const timelineSteps = [
+    { id: '01', label: 'Curiosity', path: '/home' },
+    { id: '02', label: 'Experiments', path: '/workshop' },
+    { id: '03', label: 'Building', path: '/lab' },
+    { id: '04', label: 'Freelance', path: '/watch' },
+    { id: '05', label: 'Agency', path: '/awebco' },
+    { id: '06', label: 'Playground', path: '/editor-demo' },
+    { id: '07', label: 'The Future', path: '/agenticai' }
+  ]
+
+  const handleNavigation = (path) => {
+    if (path.startsWith('/')) {
+      navigate(path)
+    }
+  }
 
   return (
-    <>
-      <CameraRig isStarted={isStarted} activeProject={activeProject} />
-      
-      {/* Background Shader - Positioned far back to act as world environment */}
-      <mesh position={[0, 0, -20]} scale={[100, 100, 1]}>
-        <planeGeometry />
-        <shaderMaterial ref={shaderRef} args={[BackgroundShader]} depthWrite={false} />
-      </mesh>
+    <div className="home-container">
+      {/* Background subtle radial gradient to ensure text legibility over any scene colors */}
+      <div className="gradient-overlay" />
 
-      <ambientLight intensity={0.1} />
-      <pointLight position={[5, 15, 5]} intensity={3} color="#00f2ff" distance={60} />
-      <spotLight 
-        position={[0, 25, 10]} 
-        angle={0.4} 
-        penumbra={1} 
-        intensity={2.5} 
-        color="#ffffff"
-      />
+      {/* R3F 3D Canvas with Theatre.js sheet connectivity */}
+      <Canvas
+        gl={{ toneMapping: THREE.AgXToneMapping, toneMappingExposure: 0.8 }}
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }}
+      >
+        <Suspense fallback={null}>
+          <SheetProvider sheet={sheet}>
+            {/* Camera Rig to apply subtle mouse coordinates parallax swaying */}
+            <CameraRig>
+              {/* Theatre.js editable Perspective Camera */}
+              <PerspectiveCamera
+                theatreKey="Camera"
+                makeDefault
+                position={[0.3, 0.4, 1.8]}
+                fov={45}
+              />
+            </CameraRig>
+            
+            {/* Theatre.js editable Lighting */}
+            <e.ambientLight theatreKey="Ambient Light" intensity={0.85} />
+            <e.pointLight theatreKey="Point Light" position={[2, 4, 3]} intensity={3.5} />
+            <e.spotLight theatreKey="Spot Light" position={[-4, 8, 4]} angle={0.3} penumbra={1} intensity={2.0} />
+            <e.directionalLight theatreKey="Directional Light" position={[5, 10, 5]} intensity={2.0} />
+            <Environment preset="city" />
+            
+            {/* 3D Background Plane */}
+            <EnvironmentBackground />
+            
+            {/* Theatre.js editable Curiosity model group */}
+            <e.group theatreKey="Curiosity Model" position={[0.5, -0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+              <CuriosityModel onStickerClick={handleStickerClick} />
+            </e.group>
+          </SheetProvider>
+        </Suspense>
+      </Canvas>
 
-      <group ref={groupRef}>
-        <Model onProjectSelect={onProjectSelect} activeProject={activeProject} />
-      </group>
-    </>
+      {/* Modern overlays layer */}
+      <div className="ui-overlay">
+        {/* Top Timeline scrollbar header */}
+        <header className="timeline-header">
+          <div className="timeline-line" />
+          {timelineSteps.map((step) => (
+            <button
+              key={step.id}
+              className={`timeline-node ${step.id === '01' ? 'active' : ''}`}
+              onClick={() => handleNavigation(step.path)}
+            >
+              <div className="node-circle">{step.id}</div>
+              <span className="node-label">{step.label}</span>
+            </button>
+          ))}
+        </header>
+
+        {/* Outer content container mapping both left sections */}
+        <div className="left-content-wrapper">
+          {/* Main Narrative Copy Section */}
+          <main className={`left-content ${selectedSticker ? 'fade-out-up' : ''}`}>
+            <h1>01 / CURIOSITY</h1>
+            <h2>The beginning of everything.</h2>
+            <p>
+              {`I was told I should become an accountant.
+              So I studied it. I learned it.
+              But technology was changing fast,
+              and something else caught my attention.
+
+              I stopped asking "What job should I get?"
+              and started asking "What can I build?"`}
+            </p>
+            
+            {/* Accent handwritten text block */}
+            <div className="accent-text-container">
+              <svg 
+                width="28" 
+                height="28" 
+                viewBox="0 0 50 50" 
+                fill="none" 
+                className="accent-arrow"
+              >
+                <path 
+                  d="M10,10 Q25,5 35,25 T40,40" 
+                  stroke="#c5a880" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round"
+                />
+                <path 
+                  d="M33,37 L40,40 L41,32" 
+                  stroke="#c5a880" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="accent-text">this was the moment everything shifted.</span>
+            </div>
+          </main>
+
+          {/* Sticker details sub-page section */}
+          <div className={`sticker-page-container ${selectedSticker ? 'fade-in-up' : ''}`}>
+            <h1>{selectedSticker ? `01 / ${selectedSticker.toUpperCase()}` : '01 / DETAIL'}</h1>
+            <h2>Interactive Artifact</h2>
+            <p>
+              {selectedSticker === 'Sticker1' && "The primary badge representing coding principles, design logic, and structural planning frameworks. This is where execution starts."}
+              {selectedSticker === 'Sticker2' && "The conceptual draft containing rough outlines, visual layouts, and spatial calculations. A snapshot of pure creative freedom."}
+              {selectedSticker === 'Sticker3' && "The workspace coordinate guidelines. Specifying three-dimensional rotations, lights, environments, and mesh dimensions."}
+              {selectedSticker === 'Sticker4' && "The database connector node. Managing data arrays, schema setups, and cloud integrations for SaaS products."}
+              {selectedSticker === 'Sticker5' && "The business dev and cold outreach engine. Scaling client systems, marketing channels, and brand strategies."}
+              
+              {selectedSticker === 'Notebook' && "The idea sketching canvas. Used to draft wireframes, system diagrams, and outline project objectives before writing code."}
+              {selectedSticker === 'Cup' && "The coffee container labeled 'Fuel the Dream'. Represents persistent effort, morning focus sessions, and night-time debugging cycles."}
+              {selectedSticker === 'Calculator' && "The financial planning tool. Symbolizes the analytical transition from traditional bookkeeping constraints into software building freedom."}
+              {selectedSticker === 'PC' && "The vintage CRT terminal screen. Booting the custom workspace terminal environment and processing creative code loops."}
+            </p>
+            
+            <button className="back-button" onClick={handleBackToHome}>
+              ← BACK TO CURIOSITY
+            </button>
+          </div>
+        </div>
+
+        {/* Bottom Scroll to Continue element (navigates to workshop/experiments page) */}
+        <button className="scroll-continue" onClick={() => handleNavigation('/workshop')}>
+          <span className="scroll-text">SCROLL TO CONTINUE</span>
+          <div className="mouse-icon">
+            <div className="mouse-wheel" />
+          </div>
+        </button>
+      </div>
+    </div>
   )
 }

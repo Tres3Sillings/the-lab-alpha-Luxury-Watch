@@ -154,7 +154,7 @@ export default function Overlay({ progress }) {
 
       {/* FIXED BRANDING */}
 <Link 
-  to="/home" 
+  to="/lab" 
   state={{ from: 'watch' }}
   className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 hover:text-white transition-colors"
   style={{ 

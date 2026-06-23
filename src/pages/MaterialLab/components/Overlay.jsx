@@ -8,7 +8,7 @@ export default function Overlay({ isGlitching }) {
     <div className="blueprint-overlay">
       {/* Navigation Link - Uses neon green to match Forbidden.Thread aesthetic */}
       <Link 
-        to="/home" 
+        to="/lab" 
         state={{ from: 'material-lab' }}
         className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#00ff88]/40 hover:text-[#00ff88] transition-colors"
         style={{ 

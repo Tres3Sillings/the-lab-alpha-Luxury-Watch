@@ -3,7 +3,8 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import './index.css'
 import Watch from './pages/WatchLab/Watch.jsx' // Directly importing the Experience
-import Home from './Home.jsx'
+import Home from './pages/Home/Experience.jsx'
+import Lab from './pages/Lab/Lab.jsx' // Importing the 3D Lab
 import Shoe from './pages/ShoeLab/Shoe.jsx'
 import Forge from './pages/Forge/Sword.jsx' // Importing the Sword Page/Builder
 import Awebco from './pages/Awebco/Experience.jsx' // Importing the Awebco Page/Builder
@@ -19,15 +20,16 @@ createRoot(document.getElementById('root')).render(
       <Routes>
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/lab" element={<Lab />} />
         <Route path="/watch" element={<Watch />} />
-      <Route path="/shoe" element={<Shoe />} />
-      <Route path="/forge" element={<Forge />} />
-      <Route path="/awebco" element={<Awebco />} />
-      <Route path="/materiallab" element={<MaterialLab />} />
-      <Route path="/agenticai" element={<AgenticAi />} />
-      <Route path="/workshop" element={<Workshop />} />
-      <Route path="/editor-demo" element={<EditorDemo />} />
-      <Route path="/coffin-editor" element={<CoffinEditor />} />
+        <Route path="/shoe" element={<Shoe />} />
+        <Route path="/forge" element={<Forge />} />
+        <Route path="/awebco" element={<Awebco />} />
+        <Route path="/materiallab" element={<MaterialLab />} />
+        <Route path="/agenticai" element={<AgenticAi />} />
+        <Route path="/workshop" element={<Workshop />} />
+        <Route path="/editor-demo" element={<EditorDemo />} />
+        <Route path="/coffin-editor" element={<CoffinEditor />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

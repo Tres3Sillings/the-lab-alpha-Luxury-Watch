@@ -1,8 +1,17 @@
-@import "tailwindcss";
-
-/* 1. IMPORT THE FONTS */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-condensed: "Bebas Neue", sans-serif;
+  --color-gold-tint: #c5a880;
+  --color-gold-dark: #b89565;
+}
+
+.font-condensed {
+  font-family: 'Bebas Neue', sans-serif;
+}
 
 :root {
   /* 2. UPDATE DEFAULT FONT STACK */
@@ -58,6 +67,12 @@ h1 {
   line-height: 1.1;
 }
 
+button:not([class*="bg-"]) {
+  background-color: #1a1a1a;
+}
+button:not([class*="text-"]) {
+  color: white;
+}
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -65,16 +80,15 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: #00f2ff;
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 4px auto rgba(0, 242, 255, 0.4);
 }
 
 @media (prefers-color-scheme: light) {
