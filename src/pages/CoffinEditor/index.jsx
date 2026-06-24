@@ -24,7 +24,7 @@ export default function Experience() {
       
       {/* Sidebar */}
       <div style={{ width: '350px', backgroundColor: COLORS.darkBlue, color: COLORS.white, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem', zIndex: 10 }}>
-        <h1 style={{ color: COLORS.accentBlue, margin: 0 }}>The Lab</h1>
+        <h1 style={{ color: COLORS.accentBlue, margin: 0 }}>Tres Sillings</h1>
         
         {/* Coffin Body */}
         <div>

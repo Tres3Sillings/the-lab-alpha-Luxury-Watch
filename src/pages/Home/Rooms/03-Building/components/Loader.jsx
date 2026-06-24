@@ -54,7 +54,7 @@ export default function Loader() {
               fontSize: '2.5rem',
               margin: 0
             }}>
-              THE LAB
+              TRES SILLINGS
             </h1>
 
             <div style={{ width: '200px', height: '1px', background: '#111', marginTop: '30px', position: 'relative' }}>

@@ -1,0 +1,48 @@
+{
+  "sheetsById": {
+    "Curiosity Scene": {
+      "staticOverrides": {
+        "byObject": {
+          "Ambient Light": {
+            "intensity": 9.350000000000005
+          },
+          "Camera": {
+            "position": {
+              "x": 0.5300000000000002,
+              "z": 1.3200000000000007,
+              "y": 0.41000000000000014
+            },
+            "rotation": {
+              "y": 0.30000000000000004,
+              "x": -0.09
+            }
+          }
+        }
+      },
+      "sequence": {
+        "subUnitsPerUnit": 30,
+        "length": 10,
+        "type": "PositionalSequence",
+        "tracksByObject": {
+          "Camera": {
+            "trackData": {
+              "QftLBKFUNQ": {
+                "type": "BasicKeyframedTrack",
+                "__debugName": "Camera:[\"near\"]",
+                "keyframes": []
+              }
+            },
+            "trackIdByPropPath": {
+              "[\"near\"]": "QftLBKFUNQ"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitionVersion": "0.4.0",
+  "revisionHistory": [
+    "G77FQz9FsKavXw33",
+    "0H_WoOe-L5TCJOcy"
+  ]
+}

@@ -129,7 +129,7 @@ function TutorialOverlay({ onComplete }) {
                     </motion.div>
                 </div>
                 
-                <h2 className="text-2xl font-black italic uppercase text-white mb-2">Welcome to the Lab</h2>
+                <h2 className="text-2xl font-black italic uppercase text-white mb-2">Welcome</h2>
                 <p className="text-zinc-400 mb-8 text-sm leading-relaxed">
                     Rotate the shoe with one finger.<br/>
                     Tap any part directly to edit it.<br/>
@@ -227,7 +227,7 @@ export default function Shoe() {
             EXIT
             </Link>
             <h1 className="text-xl font-black italic uppercase tracking-tighter leading-none text-zinc-700">
-            NIKE LAB
+            NIKE BY TRES
             </h1>
          </div>
       </div>

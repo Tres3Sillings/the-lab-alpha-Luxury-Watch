@@ -59,7 +59,7 @@ export default function SwordBuilder() {
         {/* Header: Smaller text and padding on mobile */}
         <div className="absolute top-4 left-4 md:top-8 md:left-8 z-10 pointer-events-none">
           <Link to="/lab" className="pointer-events-auto text-[10px] font-sans font-bold tracking-[0.2em] uppercase text-white/40 hover:text-[#d4af37] transition-colors">
-            ← THE LAB / FORGE
+            ← TRES SILLINGS / FORGE
           </Link>
           <h1 className="text-4xl md:text-6xl font-black uppercase mt-1 md:mt-2 tracking-widest text-[#d4af37] drop-shadow-lg leading-none">
             King's <br /> <span className="text-white/10">Maker</span>

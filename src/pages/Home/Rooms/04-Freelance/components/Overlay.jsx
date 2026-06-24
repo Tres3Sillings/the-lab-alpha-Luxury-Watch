@@ -65,7 +65,7 @@ export default function Overlay({ progress }) {
         textAlign: 'center'
       }}>
         <h1 style={{ color: 'white', fontSize: '8vw', margin: 0, textTransform: 'uppercase' }}>
-          The Lab Alpha
+          Tres Sillings
         </h1>
         <p style={{ color: '#aaa', fontSize: '1.5vw', letterSpacing: '4px' }}>
           TIME DEFINED BY DESIGN
@@ -165,7 +165,7 @@ export default function Overlay({ progress }) {
     zIndex: 20            // Ensure it sits above everything else
   }}
 >
-  ← THE LAB / ALPHA
+  ← TRES SILLINGS
 </Link>
     </div>
   )
