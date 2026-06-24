@@ -10,6 +10,7 @@ import { Model as CuriosityModel } from './Components/01-CURIOSITY.jsx'
 import bgImageUrl from './Components/BG-Image.webp'
 import { Environment, useTexture } from '@react-three/drei'
 import './Home.css'
+import projectState from './Curiosity Project.theatre-project-state.json'
 
 // Initialize Theatre.js studio only in development environment
 if (import.meta.env.DEV) {
@@ -17,7 +18,7 @@ if (import.meta.env.DEV) {
   studio.extend(extension)
 }
 
-const project = getProject('Curiosity Project')
+const project = getProject('Curiosity Project', { state: projectState })
 const sheet = project.sheet('Curiosity Scene')
 
 // Sky Plane background component using the new BG-Image.webp asset
