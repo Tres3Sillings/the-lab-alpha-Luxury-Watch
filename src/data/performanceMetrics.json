@@ -1,0 +1,439 @@
+{
+  "/curiosity": {
+    "chapter": "CH 01",
+    "title": "Curiosity Room",
+    "rating": "A+",
+    "totalSize": "655.4 KB",
+    "accentColor": "#00f2ff",
+    "accentColorRgb": "0, 242, 255",
+    "refCompare": "73.3% lighter than the average web page (2.4 MB)!",
+    "refCompareVal": 73.33170572916666,
+    "description": "3D Scene with interactive desk objects. Optimization includes custom Draco GLTF compression and Web Audio API synthesized backing track (saving ~8.5MB of MP3 payload).",
+    "breakdown": [
+      {
+        "name": "Desk Scene Model",
+        "size": "605.9 KB",
+        "type": "model"
+      },
+      {
+        "name": "Audio (Synthesized Chords)",
+        "size": "0.0 KB",
+        "type": "audio"
+      },
+      {
+        "name": "Glitch Sound Effects",
+        "size": "34.5 KB",
+        "type": "audio"
+      },
+      {
+        "name": "Code, Styles & Shaders",
+        "size": "~15.0 KB",
+        "type": "code"
+      },
+      {
+        "name": "External Images",
+        "size": "0.0 KB",
+        "type": "image"
+      }
+    ],
+    "techs": [
+      "React",
+      "Three.js",
+      "Draco",
+      "Theatre.js",
+      "Web Audio API"
+    ]
+  },
+  "/experiments": {
+    "chapter": "CH 02",
+    "title": "Experiments Room",
+    "rating": "A++",
+    "totalSize": "74.7 KB",
+    "accentColor": "#c5a880",
+    "accentColorRgb": "197, 168, 208",
+    "refCompare": "97.0% lighter than the average web page (2.4 MB)!",
+    "refCompareVal": 96.96044921875001,
+    "description": "A workspace displaying multiple custom WebGL configurations. The scene model features a minimal vertex budget and reuses cached audio assets from Chapter 01 to eliminate duplicate network calls.",
+    "breakdown": [
+      {
+        "name": "Workshop Model",
+        "size": "39.7 KB",
+        "type": "model"
+      },
+      {
+        "name": "Audio (Cached Chords)",
+        "size": "0.0 KB",
+        "type": "audio"
+      },
+      {
+        "name": "Code, Styles & Shaders",
+        "size": "~35.0 KB",
+        "type": "code"
+      },
+      {
+        "name": "External Images",
+        "size": "0.0 KB",
+        "type": "image"
+      }
+    ],
+    "techs": [
+      "React",
+      "Three.js",
+      "Mesh Minimization",
+      "Cache reuse"
+    ]
+  },
+  "/materiallab": {
+    "chapter": "APP",
+    "title": "Material Slime Lab",
+    "rating": "A++",
+    "totalSize": "54.5 KB",
+    "accentColor": "#00ff88",
+    "accentColorRgb": "0, 255, 136",
+    "refCompare": "97.8% lighter than the average web page (2.4 MB)!",
+    "refCompareVal": 97.78238932291666,
+    "description": "A procedural material configurator page. Models are constructed programmatically using Three.js mathematical geometries (0 KB GLB payload).",
+    "breakdown": [
+      {
+        "name": "Procedural Spheres",
+        "size": "0.0 KB",
+        "type": "model"
+      },
+      {
+        "name": "Glitch Sound Effects",
+        "size": "34.5 KB",
+        "type": "audio"
+      },
+      {
+        "name": "Custom Shaders & Leva Controls",
+        "size": "~20.0 KB",
+        "type": "code"
+      }
+    ],
+    "techs": [
+      "React Three Fiber",
+      "Leva UI",
+      "Procedural Mesh",
+      "Post-processing"
+    ]
+  },
+  "/building": {
+    "chapter": "CH 03",
+    "title": "Building (Main)",
+    "rating": "A++",
+    "totalSize": "8.0 KB",
+    "accentColor": "#ff8c42",
+    "accentColorRgb": "255, 140, 66",
+    "refCompare": "99.7% lighter than the average web page (2.4 MB)!",
+    "refCompareVal": 99.67447916666666,
+    "description": "Highly performant HTML/CSS placeholder. Sub-apps (like the 3D Lab Hub, which has a 2.93 MB payload) are lazy-loaded on request, ensuring users don't download assets they don't interact with.",
+    "breakdown": [
+      {
+        "name": "Page Code & CSS",
+        "size": "8.0 KB",
+        "type": "code"
+      },
+      {
+        "name": "3D Models (Lazy-loaded)",
+        "size": "0.0 KB",
+        "type": "model"
+      },
+      {
+        "name": "External Images",
+        "size": "0.0 KB",
+        "type": "image"
+      }
+    ],
+    "techs": [
+      "React",
+      "CSS Grid",
+      "Lazy-loading",
+      "Vite Bundle Splits"
+    ]
+  },
+  "/freelance": {
+    "chapter": "CH 04",
+    "title": "Freelance (Main)",
+    "rating": "A++",
+    "totalSize": "8.0 KB",
+    "accentColor": "#4ecdc4",
+    "accentColorRgb": "78, 205, 196",
+    "refCompare": "99.7% lighter than the average web page (2.4 MB)!",
+    "refCompareVal": 99.67447916666666,
+    "description": "A lightweight portal summarizing freelance development. High-fidelity 3D sub-apps (such as the Watch Lab customizer at 28.3 MB) are separated into lazy-loaded routes with full loading screens.",
+    "breakdown": [
+      {
+        "name": "Page Code & CSS",
+        "size": "8.0 KB",
+        "type": "code"
+      },
+      {
+        "name": "3D Models (Lazy-loaded)",
+        "size": "0.0 KB",
+        "type": "model"
+      },
+      {
+        "name": "External Images",
+        "size": "0.0 KB",
+        "type": "image"
+      }
+    ],
+    "techs": [
+      "React",
+      "Code Splitting",
+      "Dynamic Imports"
+    ]
+  },
+  "/agency": {
+    "chapter": "CH 05",
+    "title": "Agency (Main)",
+    "rating": "A++",
+    "totalSize": "7.0 KB",
+    "accentColor": "#7b6fff",
+    "accentColorRgb": "123, 111, 255",
+    "refCompare": "99.7% lighter than the average web page (2.4 MB)!",
+    "refCompareVal": 99.71516927083334,
+    "description": "Pure static semantic layout summarizing professional agency experience. Built with strict SEO and accessibility protocols, featuring sub-50ms paint times.",
+    "breakdown": [
+      {
+        "name": "Page Code & CSS",
+        "size": "7.0 KB",
+        "type": "code"
+      },
+      {
+        "name": "3D Models (WIP Scene)",
+        "size": "0.0 KB (Not Loaded)",
+        "type": "model"
+      }
+    ],
+    "techs": [
+      "HTML5 Semantics",
+      "Vanilla CSS",
+      "SEO Meta"
+    ]
+  },
+  "/playground": {
+    "chapter": "CH 06",
+    "title": "Playground (Main)",
+    "rating": "A++",
+    "totalSize": "12.0 KB",
+    "accentColor": "#00f5d4",
+    "accentColorRgb": "0, 245, 212",
+    "refCompare": "99.5% lighter than the average web page (2.4 MB)!",
+    "refCompareVal": 99.51171875,
+    "description": "A playground index page. Clicking into the 3D Room Editor loads a 1.36 MB layout configurator. Furniture assets are procedurally generated in-code (0 KB model files) where possible.",
+    "breakdown": [
+      {
+        "name": "Page Code & CSS",
+        "size": "12.0 KB",
+        "type": "code"
+      },
+      {
+        "name": "3D Models (Lazy-loaded)",
+        "size": "0.0 KB",
+        "type": "model"
+      }
+    ],
+    "techs": [
+      "TypeScript",
+      "Code Splitting",
+      "Procedural Mesh Logic"
+    ]
+  },
+  "/future": {
+    "chapter": "CH 07",
+    "title": "The Future",
+    "rating": "A++",
+    "totalSize": "5.0 KB",
+    "accentColor": "#e8e8e8",
+    "accentColorRgb": "232, 232, 232",
+    "refCompare": "99.8% lighter than the average web page (2.4 MB)!",
+    "refCompareVal": 99.79654947916666,
+    "description": "Minimalist landing layout showcasing dynamic vector lines and GPU-accelerated glowing grid layouts.",
+    "breakdown": [
+      {
+        "name": "Page Code & CSS",
+        "size": "5.0 KB",
+        "type": "code"
+      }
+    ],
+    "techs": [
+      "React",
+      "CSS Keyframes",
+      "GPU Composition"
+    ]
+  },
+  "/shoe": {
+    "chapter": "APP",
+    "title": "Nike Customizer",
+    "rating": "A",
+    "totalSize": "2.04 MB",
+    "accentColor": "#c8102e",
+    "accentColorRgb": "200, 16, 46",
+    "refCompare": "14.8% lighter than the average web page (2.4 MB)!",
+    "refCompareVal": 14.816080729166664,
+    "description": "Interactive shoe customizer. The high-resolution shoe model is heavily optimized using Draco compression. Clickable parts (swoosh, laces, sole) share textures to reduce duplicate payload.",
+    "breakdown": [
+      {
+        "name": "Shoe Model (Draco)",
+        "size": "2.02 MB",
+        "type": "model"
+      },
+      {
+        "name": "Customizer Engine",
+        "size": "~25.0 KB",
+        "type": "code"
+      }
+    ],
+    "techs": [
+      "React Three Fiber",
+      "Draco Compression",
+      "Texture Atlas Sharing"
+    ]
+  },
+  "/watch-lab": {
+    "chapter": "APP",
+    "title": "Luxury Watch Lab",
+    "rating": "B",
+    "totalSize": "28.40 MB",
+    "accentColor": "#c5a880",
+    "accentColorRgb": "197, 168, 128",
+    "refCompare": "Higher payload due to ultra-high fidelity assets.",
+    "refCompareVal": 0,
+    "description": "A photorealistic 3D watch customizer. Features a complex, uncompressed 28.3 MB luxury watch model with detailed adjustment knobs and moving gear hands. Utilizes loading progress indicators.",
+    "breakdown": [
+      {
+        "name": "Luxury Watch Model",
+        "size": "28.37 MB",
+        "type": "model"
+      },
+      {
+        "name": "Customizer Engine",
+        "size": "~30.0 KB",
+        "type": "code"
+      }
+    ],
+    "techs": [
+      "React Three Fiber",
+      "OrbitControls",
+      "Progressive Asset Loading"
+    ]
+  },
+  "/coffin-editor": {
+    "chapter": "APP",
+    "title": "Coffin Designer",
+    "rating": "A",
+    "totalSize": "8.17 MB",
+    "accentColor": "#7b6fff",
+    "accentColorRgb": "123, 111, 255",
+    "refCompare": "Higher payload due to ultra-high fidelity assets.",
+    "refCompareVal": 0,
+    "description": "Custom configuration editor. Loads a 7.58 MB coffin model alongside a 588 KB UI preview thumbnail. Real-time material mapping allows swapping wood grains and metal trims dynamically.",
+    "breakdown": [
+      {
+        "name": "Coffin Model",
+        "size": "7.58 MB",
+        "type": "model"
+      },
+      {
+        "name": "Preview Mockup Thumbnail",
+        "size": "588.5 KB",
+        "type": "image"
+      },
+      {
+        "name": "Workbench Engine",
+        "size": "~15.0 KB",
+        "type": "code"
+      }
+    ],
+    "techs": [
+      "React Three Fiber",
+      "Dynamic Material Bindings",
+      "Asset Preloading"
+    ]
+  },
+  "/forge": {
+    "chapter": "APP",
+    "title": "King's Forge",
+    "rating": "A+",
+    "totalSize": "1.22 MB",
+    "accentColor": "#d4af37",
+    "accentColorRgb": "212, 175, 55",
+    "refCompare": "49.2% lighter than the average web page (2.4 MB)!",
+    "refCompareVal": 49.18619791666667,
+    "description": "Dynamic sword building forge. Blends custom hilts, blades, and guards in R3F. Note: Model asset is currently set to placeholder / offline.",
+    "breakdown": [
+      {
+        "name": "Sword Parts Model (Est.)",
+        "size": "1.20 MB",
+        "type": "model"
+      },
+      {
+        "name": "Forge Logic",
+        "size": "~20.0 KB",
+        "type": "code"
+      }
+    ],
+    "techs": [
+      "React Three Fiber",
+      "Mesh Swapping",
+      "Metal Reflection Shaders"
+    ]
+  },
+  "/3d-room": {
+    "chapter": "APP",
+    "title": "3D Lab Hub Workspace",
+    "rating": "A",
+    "totalSize": "2.96 MB",
+    "accentColor": "#00f2ff",
+    "accentColorRgb": "0, 242, 255",
+    "refCompare": "Higher payload due to ultra-high fidelity assets.",
+    "refCompareVal": 0,
+    "description": "Interactive portfolio hub. Loads a 2.93 MB laboratory scene featuring glowing computer monitors, neon rings, and a custom orbit camera transition engine.",
+    "breakdown": [
+      {
+        "name": "Lab Hub Scene Model",
+        "size": "2.93 MB",
+        "type": "model"
+      },
+      {
+        "name": "Workspace Code & HUD",
+        "size": "~30.0 KB",
+        "type": "code"
+      }
+    ],
+    "techs": [
+      "React Three Fiber",
+      "Camera Rigging",
+      "gsap transitions"
+    ]
+  },
+  "/room-editor": {
+    "chapter": "APP",
+    "title": "Procedural Room Editor",
+    "rating": "A",
+    "totalSize": "1.41 MB",
+    "accentColor": "#00f5d4",
+    "accentColorRgb": "0, 245, 212",
+    "refCompare": "41.3% lighter than the average web page (2.4 MB)!",
+    "refCompareVal": 41.28906249999999,
+    "description": "A procedural layout configurator. Standard objects like walls, floors, doors, and standard tables are constructed dynamically in JS code (0 KB GLB files), while the Tank Chair GLB loads as a rich detail model.",
+    "breakdown": [
+      {
+        "name": "Tank Chair Model",
+        "size": "1.37 MB",
+        "type": "model"
+      },
+      {
+        "name": "Procedural Room Builder",
+        "size": "~40.0 KB",
+        "type": "code"
+      }
+    ],
+    "techs": [
+      "TypeScript",
+      "Procedural Math Geometry",
+      "React Context Store"
+    ]
+  }
+}

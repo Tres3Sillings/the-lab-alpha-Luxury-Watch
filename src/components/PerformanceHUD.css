@@ -1,0 +1,303 @@
+/* Performance HUD Stylesheet */
+.perf-hud-container {
+  position: fixed;
+  bottom: 25px;
+  left: 25px;
+  z-index: 9999;
+  font-family: 'Space Mono', Courier, monospace;
+  pointer-events: auto;
+}
+
+/* Compact HUD pill styling */
+.perf-hud-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(8, 8, 8, 0.85);
+  border: 1px solid var(--hud-accent, rgba(0, 242, 255, 0.4));
+  padding: 8px 16px;
+  border-radius: 30px;
+  cursor: pointer;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(var(--hud-accent-rgb), 0.15);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.perf-hud-pill:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: var(--hud-accent, #00f2ff);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.6), 0 0 25px rgba(var(--hud-accent-rgb), 0.3);
+}
+
+.perf-hud-icon-pulse {
+  color: var(--hud-accent, #00f2ff);
+  font-size: 13px;
+  animation: hud-pulse 1.8s infinite alternate;
+}
+
+@keyframes hud-pulse {
+  0% { opacity: 0.6; transform: scale(0.9); text-shadow: 0 0 2px var(--hud-accent); }
+  100% { opacity: 1; transform: scale(1.15); text-shadow: 0 0 8px var(--hud-accent); }
+}
+
+/* Expanded Card styling */
+.perf-hud-card {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 380px;
+  background: rgba(10, 10, 10, 0.95);
+  border: 1.5px solid var(--hud-accent, #00f2ff);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(var(--hud-accent-rgb), 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: bottom left;
+  animation: hud-card-appear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #e0e0e0;
+}
+
+@keyframes hud-card-appear {
+  0% { transform: translateY(20px) scale(0.92); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* Header & Close */
+.perf-hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+}
+
+.perf-hud-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.perf-hud-chapter-tag {
+  font-size: 8px;
+  color: var(--hud-accent, #00f2ff);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 700;
+}
+
+.perf-hud-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 3px;
+  letter-spacing: 0.5px;
+}
+
+.perf-hud-close-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #888 !important;
+  cursor: pointer !important;
+  font-size: 16px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 24px !important;
+  height: 24px !important;
+  transition: color 0.2s !important;
+}
+
+.perf-hud-close-btn:hover {
+  color: #fff !important;
+}
+
+/* Rating Badge & Payload Score */
+.perf-hud-main-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.perf-hud-payload-display {
+  display: flex;
+  flex-direction: column;
+}
+
+.perf-hud-payload-val {
+  font-size: 28px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.1;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.perf-hud-payload-lbl {
+  font-size: 9px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+.perf-hud-rating-badge {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 1px solid currentColor;
+}
+
+/* Compare Graph / Slider */
+.perf-hud-compare-section {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+.perf-hud-compare-text {
+  font-size: 10px;
+  line-height: 1.4;
+  color: #aaa;
+  margin-bottom: 8px;
+}
+
+.perf-hud-bar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.perf-hud-bar-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.perf-hud-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 8px;
+  color: #666;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.perf-hud-bar-bg {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.perf-hud-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.8s ease-out;
+}
+
+/* File Breakdown Table */
+.perf-hud-breakdown-title {
+  font-size: 9px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.perf-hud-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+  margin-bottom: 15px;
+}
+
+.perf-hud-table tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.perf-hud-table tr:last-child {
+  border-bottom: none;
+}
+
+.perf-hud-table td {
+  padding: 6px 0;
+}
+
+.perf-hud-file-name {
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.perf-hud-file-icon {
+  font-size: 8px;
+  opacity: 0.5;
+}
+
+.perf-hud-file-size {
+  text-align: right;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Description & Tech Tags */
+.perf-hud-desc {
+  font-size: 9.5px;
+  line-height: 1.45;
+  color: #888;
+  margin-bottom: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 10px;
+}
+
+.perf-hud-techs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.perf-hud-tech-tag {
+  font-size: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: #aaa;
+  text-transform: uppercase;
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 480px) {
+  .perf-hud-container {
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+  }
+  .perf-hud-pill {
+    padding: 6px 12px;
+    font-size: 10px;
+  }
+  .perf-hud-card {
+    width: auto;
+    right: 0;
+    padding: 15px;
+  }
+  .perf-hud-payload-val {
+    font-size: 24px;
+  }
+}

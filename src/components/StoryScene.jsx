@@ -4,38 +4,29 @@ import { useGLTF, Float, Sparkles, Stars, Environment } from '@react-three/drei'
 import * as THREE from 'three'
 import { easing } from 'maath'
 
-// --- HELPER COMPONENT FOR TABLET MODEL ---
-function TabletModel({ active, ...props }) {
-  const { nodes, materials } = useGLTF('/tablet-transformed.glb')
-  const groupRef = useRef()
-
-  useFrame((state, delta) => {
-    const targetScale = active ? 6 : 0
-    easing.damp3(groupRef.current.scale, [targetScale, targetScale, targetScale], 0.25, delta)
-    if (active) {
-      groupRef.current.rotation.y = Math.sin(state.clock.getElapsedTime() * 0.5) * 0.3
-      groupRef.current.rotation.x = -Math.PI / 4 + Math.cos(state.clock.getElapsedTime() * 0.4) * 0.1
-    }
-  })
-
-  return (
-    <group ref={groupRef} {...props} dispose={null}>
-      <mesh name="RightBase" geometry={nodes.RightBase.geometry} material={materials['Material.001']} position={[0.166, 0.003, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={-1} />
-      <mesh name="LeftBase" geometry={nodes.LeftBase.geometry} material={materials['Material.002']} position={[-0.184, 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]} />
-      <mesh name="DrawingField" geometry={nodes.DrawingField.geometry} material={materials['Coated funky glass']} position={[0.001, 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]} />
-    </group>
-  )
-}
-
 // --- HELPER COMPONENT FOR WATCH MODEL ---
 function WatchModel({ active, ...props }) {
+  const [hasBeenActive, setHasBeenActive] = React.useState(false)
+
+  React.useEffect(() => {
+    if (active) {
+      setHasBeenActive(true)
+    }
+  }, [active])
+
+  if (!hasBeenActive) return null
+
+  return <WatchInner active={active} {...props} />
+}
+
+function WatchInner({ active, ...props }) {
   const { scene } = useGLTF('/mainwatchfileforthelab.glb')
   const groupRef = useRef()
   const knobRef = useRef()
   const hourHandRef = useRef()
   const minuteHandRef = useRef()
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (scene) {
       knobRef.current = scene.getObjectByName('adjustment_knob_main')
       hourHandRef.current = scene.getObjectByName('Hand_S') 
@@ -56,84 +47,6 @@ function WatchModel({ active, ...props }) {
   })
 
   return <group ref={groupRef} {...props}><primitive object={scene} /></group>
-}
-
-// --- HELPER COMPONENT FOR ROCKET MODEL ---
-function RocketModel({ active, ...props }) {
-  const { nodes, materials } = useGLTF('/rocketawebco-transformed.glb')
-  const groupRef = useRef()
-  const flameRef = useRef()
-
-  useFrame((state, delta) => {
-    const targetScale = active ? 6 : 0
-    easing.damp3(groupRef.current.scale, [targetScale, targetScale, targetScale], 0.25, delta)
-    if (active) {
-      groupRef.current.rotation.y += delta * 0.4
-      groupRef.current.position.y = Math.sin(state.clock.getElapsedTime() * 1.5) * 0.2
-      
-      if (flameRef.current) {
-        const flicker = Math.sin(state.clock.elapsedTime * 60) * 0.08
-        flameRef.current.scale.x = 1 + flicker
-        flameRef.current.scale.z = 1 + flicker
-        flameRef.current.scale.y = 1.5 + Math.sin(state.clock.elapsedTime * 20) * 0.3
-      }
-    }
-  })
-
-  return (
-    <group ref={groupRef} {...props} dispose={null}>
-      <group rotation={[1.546, 0.006, -2.999]} scale={0.057}>
-        <mesh geometry={nodes['Object_59_Plastic_(1)_0_1'].geometry} material={materials.Plastic_1} />
-        <mesh geometry={nodes['Object_59_Plastic_(1)_0_2'].geometry} material={materials['Blue Carbon Fiber']} />
-        <mesh geometry={nodes['Object_59_Plastic_(1)_0_3'].geometry} material={materials.Plastic_2} />
-        <mesh geometry={nodes['Object_59_Plastic_(1)_0_4'].geometry} material={materials.Plastic_3} />
-        <mesh geometry={nodes['Object_59_Plastic_(1)_0_5'].geometry} material={materials.Metal_1} />
-      </group>
-      
-      {/* Flame */}
-      <group ref={flameRef} position={[0, -0.7, 0]} visible={active}>
-        <mesh position={[0, -0.6, 0]}>
-          <coneGeometry args={[0.2, 1.0, 16]} />
-          <meshBasicMaterial color="#00ffff" transparent opacity={0.8} blending={THREE.AdditiveBlending} />
-        </mesh>
-        <mesh position={[0, -0.3, 0]}>
-          <coneGeometry args={[0.1, 0.5, 8]} />
-          <meshBasicMaterial color="#ffffff" transparent opacity={0.9} blending={THREE.AdditiveBlending} />
-        </mesh>
-      </group>
-    </group>
-  )
-}
-
-// --- HELPER COMPONENT FOR PLANET MODEL ---
-function PlanetModel({ active, ...props }) {
-  const { nodes, materials } = useGLTF('/planet_01-transformed.glb')
-  const groupRef = useRef()
-
-  useFrame((state, delta) => {
-    const targetScale = active ? 4.5 : 0
-    easing.damp3(groupRef.current.scale, [targetScale, targetScale, targetScale], 0.25, delta)
-    if (active) {
-      groupRef.current.rotation.y += delta * 0.15
-      groupRef.current.rotation.z = Math.sin(state.clock.getElapsedTime() * 0.2) * 0.1
-    }
-  })
-
-  const planetMesh = useMemo(() => {
-    const firstKey = Object.keys(nodes).find(k => nodes[k].type === 'Mesh')
-    return nodes[firstKey]
-  }, [nodes])
-
-  return (
-    <group ref={groupRef} {...props} dispose={null}>
-      {planetMesh && (
-        <mesh 
-          geometry={planetMesh.geometry} 
-          material={materials[Object.keys(materials)[0]] || planetMesh.material} 
-        />
-      )}
-    </group>
-  )
 }
 
 // --- HELPER COMPONENT FOR THE LAB HUB HUB MODEL ---
@@ -176,6 +89,14 @@ function HubModel({ active, ...props }) {
 export default function StoryScene({ activeSection }) {
   const { camera } = useThree()
   const pointLightRef = useRef()
+  const [isMobile, setIsMobile] = React.useState(false)
+
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Define light color matching section mapping (Unifying in the cyan/blue spectrum)
   const activeColor = useMemo(() => {
@@ -246,8 +167,8 @@ export default function StoryScene({ activeSection }) {
       <spotLight position={[-4, 8, 4]} angle={0.3} penumbra={1} intensity={1.0} color="#ffffff" />
       
       {/* Decorative ambient elements - Unified Cyan theme */}
-      <Sparkles count={30} scale={6} size={1.2} speed={0.4} color="#00f2ff" />
-      <Stars radius={100} depth={50} count={200} factor={3} saturation={0.5} fade speed={0.8} />
+      <Sparkles count={isMobile ? 15 : 30} scale={6} size={1.2} speed={0.4} color="#00f2ff" />
+      <Stars radius={100} depth={50} count={isMobile ? 80 : 200} factor={3} saturation={0.5} fade speed={0.8} />
 
       {/* 3D Elements controlled by active sections */}
       <Float speed={1.5} rotationIntensity={0.5} floatIntensity={0.6}>
@@ -267,8 +188,4 @@ export default function StoryScene({ activeSection }) {
 }
 
 // Preload resources for speed
-useGLTF.preload('/tablet-transformed.glb')
-useGLTF.preload('/mainwatchfileforthelab.glb')
-useGLTF.preload('/rocketawebco-transformed.glb')
-useGLTF.preload('/planet_01-transformed.glb')
 useGLTF.preload('/TheLabHub_V2-transformed.glb')

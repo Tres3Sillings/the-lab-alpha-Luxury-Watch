@@ -1,20 +1,27 @@
 {
   "sheetsById": {
-    "Curiosity Scene": {
+    "Workshop Scene": {
       "staticOverrides": {
         "byObject": {
-          "Ambient Light": {
-            "intensity": 9.350000000000005
-          },
           "Camera": {
             "position": {
-              "x": 0.5300000000000002,
-              "z": 1.3200000000000007,
-              "y": 0.41000000000000014
+              "x": 0.35000000000000014,
+              "y": 0.6999999999999988,
+              "z": 2.4200000000000066
             },
             "rotation": {
-              "y": 0.30000000000000004,
-              "x": -0.09
+              "x": -0.09,
+              "y": 0,
+              "z": 0
+            }
+          },
+          "Workshop Sky Plane": {
+            "position": {
+              "y": 0.3999999999999999,
+              "z": -17.210000000000015
+            },
+            "rotation": {
+              "y": 0.2699999999999998
             }
           }
         }
@@ -23,26 +30,15 @@
         "subUnitsPerUnit": 30,
         "length": 10,
         "type": "PositionalSequence",
-        "tracksByObject": {
-          "Camera": {
-            "trackData": {
-              "QftLBKFUNQ": {
-                "type": "BasicKeyframedTrack",
-                "__debugName": "Camera:[\"near\"]",
-                "keyframes": []
-              }
-            },
-            "trackIdByPropPath": {
-              "[\"near\"]": "QftLBKFUNQ"
-            }
-          }
-        }
+        "tracksByObject": {}
       }
     }
   },
   "definitionVersion": "0.4.0",
   "revisionHistory": [
+    "2cQPhdz-UlF9WxzA",
+    "chqquwoMOkZMqTiA",
     "G77FQz9FsKavXw33",
-    "0H_WoOe-L5TCJOcy"
+    "workshop-init"
   ]
 }

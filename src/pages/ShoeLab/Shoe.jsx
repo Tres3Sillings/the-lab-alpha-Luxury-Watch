@@ -5,6 +5,7 @@ import { useGLTF, Environment, ContactShadows, OrbitControls, useProgress } from
 import { motion, AnimatePresence } from 'framer-motion'
 import * as THREE from 'three'
 import './ShoeLab.css'
+import PerformanceHUD from '../../components/PerformanceHUD'
 
 // --- 1. RESTORED SWOOSH LOADER ---
 function ShoeLoader() {
@@ -295,6 +296,9 @@ export default function Shoe() {
 
         </div>
       </div>
+
+      {/* Performance Stats HUD Overlay */}
+      <PerformanceHUD />
 
     </div>
   )

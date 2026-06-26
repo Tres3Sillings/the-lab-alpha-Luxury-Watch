@@ -1,5 +1,6 @@
 import React, { Suspense, useRef, useState, useEffect } from "react"; // Added useEffect
 import { Canvas, useFrame } from "@react-three/fiber";
+import PerformanceHUD from "../../components/PerformanceHUD";
 import { 
   OrbitControls, 
   Environment, 
@@ -197,6 +198,10 @@ export default function Experience() {
           <Scene onScannerHit={setIsGlitching} isGlitching={isGlitching} />
         </Suspense>
       </Canvas>
+
+      {/* Performance Stats HUD Overlay */}
+      <PerformanceHUD />
+
     </div>
   );
 }

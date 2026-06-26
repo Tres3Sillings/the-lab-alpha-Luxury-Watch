@@ -2,66 +2,40 @@ import React, { Suspense, useState, useEffect, useRef } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { SheetProvider, PerspectiveCamera, editable as e } from '@theatre/r3f'
 import { getProject } from '@theatre/core'
-import studio from '@theatre/studio'
-import extension from '@theatre/r3f/dist/extension'
 import { Environment, ContactShadows } from '@react-three/drei'
 import { useNavigate } from 'react-router-dom'
 import * as THREE from 'three'
 import { Model as WorkshopModel } from './Components/02-EXPERERMENT.jsx'
+import WorkshopBackground from './Components/WorkshopBackground.jsx'
 import '../01-Curiosity/Home.css' // Import shared premium folder, drawer, and shop styles
+import PerformanceHUD from '../../../../components/PerformanceHUD'
 import projectState from './Workshop Project.theatre-project-state.json'
 
 // Reuse drawer components from Room 1 Curiosity
 import AchievementsDrawer from '../01-Curiosity/Components/Drawers/AchievementsDrawer'
 import ShopDrawer from '../01-Curiosity/Components/Drawers/ShopDrawer'
 import { enableSoundEffects, disableSoundEffects } from '../01-Curiosity/Components/SoundEffects'
+import WorkshopFolderModal from './Components/Modals/WorkshopFolderModal'
+import IntroContent from './IntroContent'
+import CameraRig from '../01-Curiosity/Components/Camera/CameraRig'
 
 // Initialize Theatre.js studio only in development
 if (import.meta.env.DEV) {
-  studio.initialize()
-  studio.extend(extension)
+  Promise.all([
+    import('@theatre/studio'),
+    import('@theatre/r3f/dist/extension')
+  ]).then(([studioModule, extensionModule]) => {
+    const studio = studioModule.default
+    const extension = extensionModule.default
+    studio.initialize()
+    studio.extend(extension)
+  })
 }
 
 const project = getProject('Workshop Project', { state: projectState })
 const sheet = project.sheet('Workshop Scene')
 
-const WORKSHOP_DETAILS = {
-  Laptop: {
-    title: "02 / 3D ROOM PLAYGROUND",
-    subtitle: "Custom 3D Scene Configurator",
-    desc: "A fully interactive 3D editor built in React Three Fiber that lets users design and organize interior rooms.\n\nExperiment with dynamic layout systems, custom lights, shadows, and gltf asset placement in real-time.\n\nClick the button below to launch the interactive demo page.",
-    link: "/editor-demo",
-    btnText: "Launch 3D Playground"
-  },
-  Book: {
-    title: "02 / NIKE CUSTOMIZER",
-    subtitle: "Three.js Sneaker Colorizer",
-    desc: "Interactive Nike shoe customization workbench.\n\nSelect specific mesh segments (swoosh, laces, sole, collar) and paint them with high-fidelity materials, orbit control viewing, and touch gestures.\n\nClick below to start customizing.",
-    link: "/shoe",
-    btnText: "Customize Sneaker"
-  },
-  Notebook1: {
-    title: "02 / COFFIN DESIGNER",
-    subtitle: "Skeuomorphic Configurator Workbench",
-    desc: "A creative configuration app showcasing custom wood textures, metallic trim parameters, and custom hardware accessories for 3D modeling renders.\n\nBuilt in React Three Fiber and OrbitControls.",
-    link: "/coffin-editor",
-    btnText: "Launch Coffin Editor"
-  },
-  Notebook2: {
-    title: "02 / KING'S MAKER FORGE",
-    subtitle: "3D Sword Builder",
-    desc: "Step into the custom forge and assemble standard blades, handles, and guards with metallic reflection overlays.\n\nChoose colors and select parts visually.",
-    link: "/forge",
-    btnText: "Enter Forge"
-  },
-  Cup: {
-    title: "02 / CODING STATS",
-    subtitle: "Late Night Code Fuel",
-    desc: "Ambient stats dashboard tracking caffeine inputs and developer hours.\n\nEst. 2,100 cups consumed. Best ideas usually come after midnight.",
-    link: null,
-    btnText: ""
-  }
-}
+
 
 export default function WorkshopExperience() {
   const navigate = useNavigate()
@@ -69,6 +43,31 @@ export default function WorkshopExperience() {
   const [dismissedIntro, setDismissedIntro] = useState(false)
   const [scrollProgress, setScrollProgress]     = useState(0)
   const [backScrollProgress, setBackScrollProgress] = useState(0)
+  const [lastScrollDirection, setLastScrollDirection] = useState('forward')
+
+  // Mobile snap navigation states
+  const [focusedMobileObject, setFocusedMobileObject] = useState(null)
+  const mobileSnapObjects = [null, 'Laptop', 'Book', 'Notebook1', 'Notebook2', 'Cup']
+
+  const handleNextSnap = () => {
+    const currentIndex = mobileSnapObjects.indexOf(focusedMobileObject)
+    const nextIndex = (currentIndex + 1) % mobileSnapObjects.length
+    setFocusedMobileObject(mobileSnapObjects[nextIndex])
+  }
+
+  const handlePrevSnap = () => {
+    const currentIndex = mobileSnapObjects.indexOf(focusedMobileObject)
+    const prevIndex = (currentIndex - 1 + mobileSnapObjects.length) % mobileSnapObjects.length
+    setFocusedMobileObject(mobileSnapObjects[prevIndex])
+  }
+
+  const handleInspectSnap = () => {
+    if (focusedMobileObject) {
+      handleElementClick(focusedMobileObject)
+    } else {
+      setFocusedMobileObject('Laptop')
+    }
+  }
 
   // Wallet & Shop States (shared via LocalStorage)
   const [unlocked, setUnlocked] = useState(() => {
@@ -145,6 +144,15 @@ export default function WorkshopExperience() {
       return false
     }
   })
+
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // Particle Engine Canvas Refs
   const canvasRef = useRef(null)
@@ -623,7 +631,6 @@ export default function WorkshopExperience() {
 
   // Bidirectional scroll: down → /building, up → /curiosity
   useEffect(() => {
-    if (!dismissedIntro) return
     if (selectedElement || showShop || showAchievements) {
       setScrollProgress(0)
       setBackScrollProgress(0)
@@ -637,9 +644,11 @@ export default function WorkshopExperience() {
       if (e.deltaY > 0) {
         fwd = Math.min(100, fwd + e.deltaY * 0.15)
         bwd = Math.max(0, bwd - 4)
+        setLastScrollDirection('forward')
       } else {
         bwd = Math.min(100, bwd + Math.abs(e.deltaY) * 0.15)
         fwd = Math.max(0, fwd - 4)
+        setLastScrollDirection('backward')
       }
       setScrollProgress(fwd)
       setBackScrollProgress(bwd)
@@ -654,9 +663,11 @@ export default function WorkshopExperience() {
       if (diff > 0) {
         fwd = Math.min(100, fwd + diff * 0.5)
         bwd = Math.max(0, bwd - 4)
+        setLastScrollDirection('forward')
       } else {
         bwd = Math.min(100, bwd + Math.abs(diff) * 0.5)
         fwd = Math.max(0, fwd - 4)
+        setLastScrollDirection('backward')
       }
       setScrollProgress(fwd)
       setBackScrollProgress(bwd)
@@ -689,6 +700,7 @@ export default function WorkshopExperience() {
 
   const handleCloseFolder = () => {
     setSelectedElement(null)
+    setFocusedMobileObject(null) // Reset snap focus when closing folder modal
   }
 
   // Navigation mapping
@@ -708,7 +720,7 @@ export default function WorkshopExperience() {
     }
   }
 
-  const folderDetails = WORKSHOP_DETAILS[selectedElement]
+
 
   return (
     <div className={`home-container cursor-${activeCursor} ${glitchActive ? 'full-screen-glitch' : ''}`}>
@@ -717,22 +729,7 @@ export default function WorkshopExperience() {
 
       {/* Chapter 2 Intro Overlay */}
       <div className={`intro-overlay ${dismissedIntro ? 'dismissed' : ''}`}>
-        <div className="intro-content">
-          <h1>02 / EXPERIMENTS</h1>
-          <h2>I tried everything.</h2>
-          <p>
-            {`This is where ideas became reality.
-
-Some failed. Some worked. Every project taught me something.
-
-I wasn't chasing money — I was collecting skills.
-
-Click on objects in the room to explore the workbench projects.`}
-          </p>
-          <button className="begin-btn" onClick={() => setDismissedIntro(true)}>
-            ENTER THE WORKSHOP
-          </button>
-        </div>
+        <IntroContent onBegin={() => setDismissedIntro(true)} />
       </div>
 
       {/* R3F Canvas */}
@@ -742,19 +739,24 @@ Click on objects in the room to explore the workbench projects.`}
       >
         <Suspense fallback={null}>
           <SheetProvider sheet={sheet}>
-            {/* Theatre.js editable camera — no OrbitControls, fully locked */}
-            <PerspectiveCamera
-              theatreKey="Camera"
-              makeDefault
-              position={[0, 2.0, 3.5]}
-              fov={45}
-            />
+            {/* Camera Rig to apply subtle mouse coordinates parallax swaying or camera snaps */}
+            <CameraRig room="workshop" activeObject={selectedElement || focusedMobileObject}>
+              {/* Theatre.js editable camera — no OrbitControls, fully locked */}
+              <PerspectiveCamera
+                theatreKey={isMobile ? "Mobile Camera" : "Camera"}
+                makeDefault
+                position={isMobile ? [0, 2.0, 6.5] : [0, 2.0, 3.5]}
+                fov={isMobile ? 55 : 45}
+              />
+            </CameraRig>
 
             {/* Theatre.js editable lighting */}
             <e.ambientLight theatreKey="Ambient Light" intensity={0.7} />
             <e.pointLight theatreKey="Point Light" position={[3, 5, 3]} intensity={2.5} />
             <e.spotLight theatreKey="Spot Light" position={[-3, 6, 3]} angle={0.3} penumbra={1} intensity={1.5} />
             <Environment preset="city" />
+
+            <WorkshopBackground />
 
             {/* Room 2 Model */}
             <e.group theatreKey="Workshop Model" position={[0, -0.6, 0]} rotation={[0, -Math.PI / 4, 0]}>
@@ -782,7 +784,7 @@ Click on objects in the room to explore the workbench projects.`}
           ))}
         </header>
 
-        <div className="left-content-wrapper">
+        <div className="left-content-wrapper sr-only">
           <main className="left-content">
             <h1>02 / EXPERIMENTS</h1>
             <h2>I tried everything.</h2>
@@ -795,31 +797,43 @@ Click on objects in the room to explore the projects.`}
           </main>
         </div>
 
-        {/* Scroll back indicator — always visible after intro, goes to Curiosity (01) */}
-        {dismissedIntro && (
-          <div style={{
-            position: 'fixed', top: '70px', left: '50%', transform: 'translateX(-50%)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px',
-            zIndex: 90, opacity: backScrollProgress > 0 ? 1 : 0.35, cursor: 'pointer',
-            transition: 'opacity 0.3s'
-          }} onClick={() => navigate('/curiosity')}>
-            <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '8px', letterSpacing: '2px', color: 'rgba(255,255,255,0.5)' }}>↑ CURIOSITY</span>
-            <div style={{ width: '80px', height: '3px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${backScrollProgress}%`, background: 'rgba(255,255,255,0.5)', transition: 'width 0.1s ease-out' }} />
+        {/* Unified Scroll Indicator (Top) */}
+        {!selectedElement && !showShop && !showAchievements && (
+          <button
+            className="unified-scroll-indicator"
+            style={{
+              opacity: (lastScrollDirection === 'forward' ? scrollProgress : backScrollProgress) > 0 ? 1 : 0.45
+            }}
+            onClick={() => navigate(lastScrollDirection === 'forward' ? '/building' : '/curiosity')}
+          >
+            <span className="unified-scroll-text">
+              {lastScrollDirection === 'forward' ? '↓ CONTINUE — BUILDING' : '↑ BACK — CURIOSITY'}
+            </span>
+            <div className="unified-progress-wrap">
+              <div
+                className="unified-progress-bar"
+                style={{
+                  width: `${lastScrollDirection === 'forward' ? scrollProgress : backScrollProgress}%`
+                }}
+              />
             </div>
-          </div>
+          </button>
         )}
 
-        {/* Scroll forward → Building (03) */}
-        <button className="scroll-continue" onClick={() => navigate('/building')}>
-          <span className="scroll-text">CONTINUE — BUILDING</span>
-          <div className="scroll-progress-container">
-            <div className="scroll-progress-bar" style={{ width: `${scrollProgress}%` }} />
+        {/* Mobile Snap Navigation Dock */}
+        {isMobile && dismissedIntro && !selectedElement && !showShop && !showAchievements && (
+          <div className="mobile-snap-nav">
+            <button className="snap-arrow-btn" onClick={handlePrevSnap} aria-label="Previous Object">
+              ←
+            </button>
+            <button className="snap-center-pill" onClick={handleInspectSnap}>
+              {focusedMobileObject ? `INSPECT: ${focusedMobileObject.toUpperCase()}` : "TAP TO FOCUS"}
+            </button>
+            <button className="snap-arrow-btn" onClick={handleNextSnap} aria-label="Next Object">
+              →
+            </button>
           </div>
-          <div className="mouse-icon">
-            <div className="mouse-wheel" />
-          </div>
-        </button>
+        )}
 
         {/* Floating Trophy & Shop buttons */}
         <button 
@@ -892,54 +906,17 @@ Click on objects in the room to explore the projects.`}
         />
 
         {/* Custom Local Folder Modal for Workshop Projects */}
-        {selectedElement && folderDetails && (
-          <div className="folder-backdrop" onClick={handleCloseFolder}>
-            <div className="folder-modal" onClick={(e) => e.stopPropagation()}>
-              <div className="folder-tab-bar">
-                <div className="folder-tab active">
-                  <span className="folder-tab-icon">📁</span>
-                  <span className="folder-tab-title">{selectedElement.toUpperCase()} WORKBENCH</span>
-                </div>
-                <button className="folder-close-btn" onClick={handleCloseFolder}>
-                  <span>×</span> CLOSE FOLDER
-                </button>
-              </div>
-
-              <div className="folder-scroll-body">
-                <div className="folder-grid">
-                  <div className="folder-col-left">
-                    <div className="folder-header-title">
-                      <h1>{folderDetails.title}</h1>
-                      <h2>{folderDetails.subtitle}</h2>
-                    </div>
-                    <p className="folder-desc">{folderDetails.desc}</p>
-                    
-                    {folderDetails.link && (
-                      <button 
-                        className="play-lofi-btn playing" 
-                        style={{ marginTop: '20px', width: 'auto', alignSelf: 'flex-start', padding: '12px 24px' }}
-                        onClick={() => navigate(folderDetails.link)}
-                      >
-                        🚀 {folderDetails.btnText}
-                      </button>
-                    )}
-                  </div>
-                  
-                  <div className="folder-col-right">
-                    {/* Add visual illustration for context */}
-                    <div className="folder-media-container" style={{ marginTop: '40px' }}>
-                      <div style={{ padding: '40px', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '6px', textAlign: 'center', fontFamily: 'monospace', color: '#c5a880', fontSize: '12px' }}>
-                        <div>WORKBENCH PROJECT DECALS ACTIVE</div>
-                        <div style={{ marginTop: '10px', color: '#888' }}>Select component highlights to inspect configuration lines.</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        {selectedElement && (
+          <WorkshopFolderModal 
+            selectedElement={selectedElement}
+            handleCloseFolder={handleCloseFolder}
+            navigate={navigate}
+          />
         )}
       </div>
+
+      {/* Performance Stats HUD Overlay */}
+      <PerformanceHUD />
 
       {/* Particle trail canvas — rendered LAST so it sits above the 3D canvas */}
       <canvas 

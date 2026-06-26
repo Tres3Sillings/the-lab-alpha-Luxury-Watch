@@ -118,3 +118,168 @@ canvas {
   touch-action: pan-y !important;
   z-index: auto !important; /* Let R3F handle stacking */
 }
+
+/* ── Global Timeline Navigation ──────────────────────────────────── */
+.timeline-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  pointer-events: auto;
+  width: 100%;
+  max-width: 1100px;
+  margin: 40px auto 0;
+  padding: 0 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.timeline-line {
+  position: absolute;
+  top: 16px; /* Centers with the 32px node circles */
+  left: 80px;
+  right: 80px;
+  height: 1.5px;
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 1;
+}
+
+.timeline-node {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  cursor: pointer;
+  background: transparent !important;
+  border: none;
+  padding: 0;
+}
+
+.node-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #0d0d0d;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.35);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.node-label {
+  margin-top: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Active Node States */
+.timeline-node.active .node-circle {
+  background: #fff;
+  border-color: #fff;
+  color: #050505;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.45), 0 0 0 6px rgba(255, 255, 255, 0.15);
+}
+
+.timeline-node.active .node-label {
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.25);
+}
+
+/* Hover States for Nodes */
+.timeline-node:hover .node-circle {
+  border-color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.95);
+  transform: scale(1.08);
+}
+
+.timeline-node:hover .node-label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 768px) {
+  .timeline-header {
+    margin-top: 20px;
+    padding: 0 15px;
+  }
+  .timeline-line {
+    left: 40px;
+    right: 40px;
+    top: 13px;
+  }
+  .node-circle {
+    width: 26px;
+    height: 26px;
+    font-size: 9px;
+  }
+  .node-label {
+    display: none;
+  }
+}
+
+/* ── Unified Scroll Indicator (Top) ────────────────────────────────── */
+.unified-scroll-indicator {
+  position: fixed;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 250;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: opacity 0.3s ease;
+  background: transparent !important;
+  border: none;
+  padding: 0;
+  width: fit-content;
+}
+
+.unified-scroll-text {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.65);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.25);
+  transition: color 0.3s ease;
+}
+
+.unified-scroll-indicator:hover .unified-scroll-text {
+  color: #ffffff;
+}
+
+.unified-progress-wrap {
+  width: 90px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.unified-progress-bar {
+  height: 100%;
+  background: var(--accent, #c5a880); /* Gold tint by default, fallback to room accent color variable */
+  box-shadow: 0 0 10px rgba(197, 168, 128, 0.6);
+  width: 0%;
+  transition: width 0.1s ease-out;
+}

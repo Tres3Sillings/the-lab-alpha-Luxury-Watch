@@ -1,4 +1,5 @@
 import RoomPlaceholder from '../RoomPlaceholder'
+import IntroContent from './IntroContent'
 
 const CHAPTER = {
   id: '07',
@@ -10,5 +11,5 @@ const CHAPTER = {
 }
 
 export default function FutureRoom() {
-  return <RoomPlaceholder chapter={CHAPTER} />
+  return <RoomPlaceholder chapter={CHAPTER} IntroComponent={IntroContent} />
 }

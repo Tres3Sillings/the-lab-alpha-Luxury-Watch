@@ -2,13 +2,12 @@ import React, { Suspense, useState, useEffect, useRef } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { SheetProvider, PerspectiveCamera, editable as e } from '@theatre/r3f'
 import { getProject } from '@theatre/core'
-import studio from '@theatre/studio'
-import extension from '@theatre/r3f/dist/extension'
 import { useNavigate } from 'react-router-dom'
 import * as THREE from 'three'
 import { Model as CuriosityModel } from './Components/01-CURIOSITY.jsx'
 import { Environment } from '@react-three/drei'
 import './Home.css'
+import PerformanceHUD from '../../../../components/PerformanceHUD'
 import projectState from './Curiosity Project.theatre-project-state.json'
 
 // Import segmented sub-components
@@ -18,11 +17,19 @@ import AchievementsDrawer, { ACHIEVEMENTS } from './Components/Drawers/Achieveme
 import ShopDrawer from './Components/Drawers/ShopDrawer'
 import FolderModal from './Components/Modals/FolderModal'
 import { enableSoundEffects, disableSoundEffects } from './Components/SoundEffects'
+import IntroContent from './IntroContent'
 
 // Initialize Theatre.js studio only in development environment
 if (import.meta.env.DEV) {
-  studio.initialize()
-  studio.extend(extension)
+  Promise.all([
+    import('@theatre/studio'),
+    import('@theatre/r3f/dist/extension')
+  ]).then(([studioModule, extensionModule]) => {
+    const studio = studioModule.default
+    const extension = extensionModule.default
+    studio.initialize()
+    studio.extend(extension)
+  })
 }
 
 const project = getProject('Curiosity Project', { state: projectState })
@@ -47,6 +54,31 @@ export default function Experience() {
   const [dismissedIntro, setDismissedIntro] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [backScrollProgress, setBackScrollProgress] = useState(0)
+
+  // Mobile snap navigation states
+  const [focusedMobileObject, setFocusedMobileObject] = useState(null)
+  const mobileSnapObjects = [null, 'PC', 'Book', 'Calculator', 'Notebook', 'Cup']
+  const [lastScrollDirection, setLastScrollDirection] = useState('forward')
+
+  const handleNextSnap = () => {
+    const currentIndex = mobileSnapObjects.indexOf(focusedMobileObject)
+    const nextIndex = (currentIndex + 1) % mobileSnapObjects.length
+    setFocusedMobileObject(mobileSnapObjects[nextIndex])
+  }
+
+  const handlePrevSnap = () => {
+    const currentIndex = mobileSnapObjects.indexOf(focusedMobileObject)
+    const prevIndex = (currentIndex - 1 + mobileSnapObjects.length) % mobileSnapObjects.length
+    setFocusedMobileObject(mobileSnapObjects[prevIndex])
+  }
+
+  const handleInspectSnap = () => {
+    if (focusedMobileObject) {
+      handleStickerClick(focusedMobileObject)
+    } else {
+      setFocusedMobileObject('PC')
+    }
+  }
 
   // --- All state that scroll useEffect depends on must be declared first ---
   const [unlocked, setUnlocked] = useState(() => {
@@ -124,6 +156,15 @@ export default function Experience() {
       return false
     }
   })
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   // --- End of early state declarations ---
 
   // Auto-dismiss the intro after 15 seconds & coin accumulation
@@ -152,7 +193,6 @@ export default function Experience() {
 
   // Bidirectional scroll: down → /experiments, up → /future (wrap)
   useEffect(() => {
-    if (!dismissedIntro) return
     if (selectedSticker || showShop || showAchievements) {
       setScrollProgress(0)
       setBackScrollProgress(0)
@@ -166,9 +206,11 @@ export default function Experience() {
       if (e.deltaY > 0) {
         fwd = Math.min(100, fwd + e.deltaY * 0.15)
         bwd = Math.max(0, bwd - 4)
+        setLastScrollDirection('forward')
       } else {
         bwd = Math.min(100, bwd + Math.abs(e.deltaY) * 0.15)
         fwd = Math.max(0, fwd - 4)
+        setLastScrollDirection('backward')
       }
       setScrollProgress(fwd)
       setBackScrollProgress(bwd)
@@ -185,9 +227,11 @@ export default function Experience() {
       if (diff > 0) {
         fwd = Math.min(100, fwd + diff * 0.5)
         bwd = Math.max(0, bwd - 4)
+        setLastScrollDirection('forward')
       } else {
         bwd = Math.min(100, bwd + Math.abs(diff) * 0.5)
         fwd = Math.max(0, fwd - 4)
+        setLastScrollDirection('backward')
       }
       setScrollProgress(fwd)
       setBackScrollProgress(bwd)
@@ -773,6 +817,7 @@ export default function Experience() {
   const handleBackToHome = () => {
     window.history.pushState('', document.title, window.location.pathname + window.location.search)
     setSelectedSticker(null)
+    setFocusedMobileObject(null) // Reset snap focus when closing folder modal
   }
 
   // Timeline configuration mapping portfolio items to their corresponding routes
@@ -798,31 +843,20 @@ export default function Experience() {
       {/* Background subtle radial gradient to ensure text legibility over any scene colors */}
       <div className="gradient-overlay" />
 
-      {/* Centered Intro Overlay Screen */}
-      <div className={`intro-overlay ${dismissedIntro ? 'dismissed' : ''}`}>
-        {/* WIP Red Scrolling Warning Banner */}
-        <div className="wip-banner">
-          <div className="wip-banner-track">
-            <span>⚠️ WORK IN PROGRESS: THE SITE IS STILL A WIP SO EXPECT TO SEE A LOT OF BUGS AND UNCOMPLETED THINGS WITH PLACEHOLDER AI TEXT. THANKS FOR YOUR UNDERSTANDING!</span>
-            <span>⚠️ WORK IN PROGRESS: THE SITE IS STILL A WIP SO EXPECT TO SEE A LOT OF BUGS AND UNCOMPLETED THINGS WITH PLACEHOLDER AI TEXT. THANKS FOR YOUR UNDERSTANDING!</span>
-            <span>⚠️ WORK IN PROGRESS: THE SITE IS STILL A WIP SO EXPECT TO SEE A LOT OF BUGS AND UNCOMPLETED THINGS WITH PLACEHOLDER AI TEXT. THANKS FOR YOUR UNDERSTANDING!</span>
-            <span>⚠️ WORK IN PROGRESS: THE SITE IS STILL A WIP SO EXPECT TO SEE A LOT OF BUGS AND UNCOMPLETED THINGS WITH PLACEHOLDER AI TEXT. THANKS FOR YOUR UNDERSTANDING!</span>
+        {/* Centered Intro Overlay Screen */}
+        <div className={`intro-overlay ${dismissedIntro ? 'dismissed' : ''}`}>
+          {/* WIP Red Scrolling Warning Banner */}
+          <div className="wip-banner">
+            <div className="wip-banner-track">
+              <span>⚠️ WORK IN PROGRESS: THE SITE IS STILL A WIP SO EXPECT TO SEE A LOT OF BUGS AND UNCOMPLETED THINGS WITH PLACEHOLDER AI TEXT. THANKS FOR YOUR UNDERSTANDING!</span>
+              <span>⚠️ WORK IN PROGRESS: THE SITE IS STILL A WIP SO EXPECT TO SEE A LOT OF BUGS AND UNCOMPLETED THINGS WITH PLACEHOLDER AI TEXT. THANKS FOR YOUR UNDERSTANDING!</span>
+              <span>⚠️ WORK IN PROGRESS: THE SITE IS STILL A WIP SO EXPECT TO SEE A LOT OF BUGS AND UNCOMPLETED THINGS WITH PLACEHOLDER AI TEXT. THANKS FOR YOUR UNDERSTANDING!</span>
+              <span>⚠️ WORK IN PROGRESS: THE SITE IS STILL A WIP SO EXPECT TO SEE A LOT OF BUGS AND UNCOMPLETED THINGS WITH PLACEHOLDER AI TEXT. THANKS FOR YOUR UNDERSTANDING!</span>
+            </div>
           </div>
-        </div>
 
-        <div className="intro-content">
-          <h1>TRES SILLINGS</h1>
-          <h2>Creative Developer & 3D Web Designer</h2>
-          <p>
-            {`Welcome to my interactive 3D portfolio. I specialize in building immersive web applications, highly performant Three.js configuration workbenches, and rich frontend systems.
-
-            Explore the room. Click on objects in the desk space to examine my skills, project case studies, and creative milestones.`}
-          </p>
-          <button className="begin-btn" onClick={() => setDismissedIntro(true)}>
-            BEGIN EXPERIENCE
-          </button>
+          <IntroContent onBegin={() => setDismissedIntro(true)} />
         </div>
-      </div>
 
       {/* R3F 3D Canvas with Theatre.js sheet connectivity */}
       <Canvas
@@ -832,13 +866,13 @@ export default function Experience() {
         <Suspense fallback={null}>
           <SheetProvider sheet={sheet}>
             {/* Camera Rig to apply subtle mouse coordinates parallax swaying */}
-            <CameraRig>
+            <CameraRig room="curiosity" activeObject={selectedSticker || focusedMobileObject}>
               {/* Theatre.js editable Perspective Camera */}
               <PerspectiveCamera
-                theatreKey="Camera"
+                theatreKey={isMobile ? "Mobile Camera" : "Camera"}
                 makeDefault
-                position={[0.3, 0.4, 1.8]}
-                fov={45}
+                position={isMobile ? [0.3, 0.45, 5.3] : [0.3, 0.4, 1.8]}
+                fov={isMobile ? 55 : 45}
               />
             </CameraRig>
 
@@ -879,31 +913,43 @@ export default function Experience() {
 
         {/* left-content-wrapper removed for centered splash screen */}
 
-        {/* Scroll back indicator — always visible after intro, wraps to The Future (07) */}
-        {dismissedIntro && (
-          <div style={{
-            position: 'fixed', top: '70px', left: '50%', transform: 'translateX(-50%)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px',
-            zIndex: 90, opacity: backScrollProgress > 0 ? 1 : 0.35, cursor: 'pointer',
-            transition: 'opacity 0.3s'
-          }} onClick={() => handleNavigation('/future')}>
-            <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '8px', letterSpacing: '2px', color: 'rgba(255,255,255,0.5)' }}>↑ THE FUTURE</span>
-            <div style={{ width: '80px', height: '3px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${backScrollProgress}%`, background: 'rgba(255,255,255,0.5)', transition: 'width 0.1s ease-out' }} />
+        {/* Unified Scroll Indicator (Top) */}
+        {!selectedSticker && !showShop && !showAchievements && (
+          <button
+            className="unified-scroll-indicator"
+            style={{
+              opacity: (lastScrollDirection === 'forward' ? scrollProgress : backScrollProgress) > 0 ? 1 : 0.45
+            }}
+            onClick={() => handleNavigation(lastScrollDirection === 'forward' ? '/experiments' : '/future')}
+          >
+            <span className="unified-scroll-text">
+              {lastScrollDirection === 'forward' ? '↓ CONTINUE — EXPERIMENTS' : '↑ BACK — THE FUTURE'}
+            </span>
+            <div className="unified-progress-wrap">
+              <div
+                className="unified-progress-bar"
+                style={{
+                  width: `${lastScrollDirection === 'forward' ? scrollProgress : backScrollProgress}%`
+                }}
+              />
             </div>
-          </div>
+          </button>
         )}
 
-        {/* Bottom Scroll to Continue → Experiments (02) */}
-        <button className="scroll-continue" onClick={() => handleNavigation('/experiments')}>
-          <span className="scroll-text">SCROLL TO CONTINUE</span>
-          <div className="scroll-progress-container">
-            <div className="scroll-progress-bar" style={{ width: `${scrollProgress}%` }} />
+        {/* Mobile Snap Navigation Dock */}
+        {isMobile && dismissedIntro && !selectedSticker && !showShop && !showAchievements && (
+          <div className="mobile-snap-nav">
+            <button className="snap-arrow-btn" onClick={handlePrevSnap} aria-label="Previous Object">
+              ←
+            </button>
+            <button className="snap-center-pill" onClick={handleInspectSnap}>
+              {focusedMobileObject ? `INSPECT: ${focusedMobileObject.toUpperCase()}` : "TAP TO FOCUS"}
+            </button>
+            <button className="snap-arrow-btn" onClick={handleNextSnap} aria-label="Next Object">
+              →
+            </button>
           </div>
-          <div className="mouse-icon">
-            <div className="mouse-wheel" />
-          </div>
-        </button>
+        )}
 
         {/* Steam-Style Achievement Toast Notification */}
         {toast && (
@@ -990,6 +1036,9 @@ export default function Experience() {
           handleStickerClick={handleStickerClick}
         />
       </div>
+
+      {/* Performance Stats HUD Overlay */}
+      <PerformanceHUD />
 
       {/* HTML5 Canvas overlay for cursor trails/sparkles — rendered LAST so it sits above the 3D canvas */}
       <canvas 

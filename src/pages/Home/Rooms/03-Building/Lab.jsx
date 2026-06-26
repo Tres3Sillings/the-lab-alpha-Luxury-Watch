@@ -1,6 +1,7 @@
 import React, { useState, Suspense, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Environment, ContactShadows } from '@react-three/drei'
+import PerformanceHUD from '../../../../components/PerformanceHUD'
 import { useLocation } from 'react-router-dom'
 import * as THREE from 'three'
 import Experience from './Experience.jsx'
@@ -72,6 +73,10 @@ export default function Lab() {
           <ContactShadows opacity={0.4} scale={20} blur={2.4} />
         </Suspense>
       </Canvas>
+
+      {/* Performance Stats HUD Overlay */}
+      <PerformanceHUD />
+
     </div>
   )
 }

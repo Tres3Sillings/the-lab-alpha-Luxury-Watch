@@ -186,14 +186,25 @@ export default function VaporCursor() {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Mouse Move Listener
+    // Mouse Move & Touch Listeners
     const handleMouseMove = (e) => {
       mouseRef.current.x = e.clientX / window.innerWidth;
       mouseRef.current.y = 1.0 - (e.clientY / window.innerHeight);
       mouseRef.current.hasMoved = true;
     };
 
+    const handleTouchMove = (e) => {
+      if (e.touches && e.touches.length > 0) {
+        const touch = e.touches[0];
+        mouseRef.current.x = touch.clientX / window.innerWidth;
+        mouseRef.current.y = 1.0 - (touch.clientY / window.innerHeight);
+        mouseRef.current.hasMoved = true;
+      }
+    };
+
     window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchstart', handleTouchMove, { passive: true });
 
     // Track mouse history and tick simulation
     let animationFrameId;
@@ -260,6 +271,8 @@ export default function VaporCursor() {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', resizeCanvas);
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchstart', handleTouchMove);
       gl.deleteBuffer(positionBuffer);
       gl.deleteProgram(program);
     };

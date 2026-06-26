@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Download, Palette } from 'lucide-react';
+import PerformanceHUD from '../../components/PerformanceHUD';
 import ConfiguratorCanvas from './components/ConfiguratorCanvas';
 import CanvasEditorModal from './components/CanvasEditorModal';
 import { COLORS } from './constants';
@@ -184,6 +185,10 @@ export default function Experience() {
           }} 
         />
       )}
+
+      {/* Performance Stats HUD Overlay */}
+      <PerformanceHUD />
+
     </div>
   );
 }

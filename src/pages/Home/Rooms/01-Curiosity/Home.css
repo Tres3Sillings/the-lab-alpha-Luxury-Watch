@@ -32,7 +32,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 10;
+  z-index: 300; /* Increased to stack above intro-overlay (z-index 200) */
   pointer-events: none;
   display: flex;
   flex-direction: column;
@@ -40,93 +40,7 @@
   box-sizing: border-box;
 }
 
-/* Timeline Header */
-.timeline-header {
-  pointer-events: auto;
-  width: 100%;
-  max-width: 1100px;
-  margin: 40px auto 0;
-  padding: 0 40px;
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 
-.timeline-line {
-  position: absolute;
-  top: 16px; /* Centers with the 32px node circles */
-  left: 80px;
-  right: 80px;
-  height: 1.5px;
-  background: rgba(255, 255, 255, 0.1);
-  z-index: 1;
-}
-
-.timeline-node {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-decoration: none;
-  cursor: pointer;
-  background: transparent !important;
-  border: none;
-  padding: 0;
-}
-
-.node-circle {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #0d0d0d;
-  border: 1.5px solid rgba(255, 255, 255, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.35);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.node-label {
-  margin-top: 12px;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.3);
-  text-transform: uppercase;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Active Node States */
-.timeline-node.active .node-circle {
-  background: #fff;
-  border-color: #fff;
-  color: #050505;
-  box-shadow: 0 0 25px rgba(255, 255, 255, 0.45), 0 0 0 6px rgba(255, 255, 255, 0.15);
-}
-
-.timeline-node.active .node-label {
-  color: #fff;
-  font-weight: 700;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.25);
-}
-
-/* Hover States for Nodes */
-.timeline-node:hover .node-circle {
-  border-color: rgba(255, 255, 255, 0.85);
-  color: rgba(255, 255, 255, 0.95);
-  transform: scale(1.08);
-}
-
-.timeline-node:hover .node-label {
-  color: rgba(255, 255, 255, 0.7);
-}
 
 /* Left Content Wrapper & Sections */
 .left-content-wrapper {
@@ -287,54 +201,7 @@
 }
 
 /* Bottom Scroll to Continue */
-.scroll-continue {
-  pointer-events: auto;
-  margin: 0 auto 35px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  opacity: 0.7;
-  transition: opacity 0.3s ease;
-  background: transparent !important;
-  border: none;
-  padding: 0;
-}
-
-.scroll-continue:hover {
-  opacity: 1;
-}
-
-.scroll-text {
-  font-family: 'Space Mono', monospace;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  color: #ffffff;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.45);
-}
-
-.mouse-icon {
-  width: 20px;
-  height: 32px;
-  border: 2px solid #ffffff;
-  border-radius: 12px;
-  position: relative;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
-}
-
-.mouse-wheel {
-  width: 4px;
-  height: 8px;
-  background: #fff;
-  border-radius: 2px;
-  position: absolute;
-  top: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: scrollWheel 1.6s infinite ease-in-out;
-}
+/* Bottom Scroll to Continue is deprecated, using unified scroll indicator in index.css */
 
 /* Animations */
 @keyframes scrollWheel {
@@ -370,24 +237,9 @@ html, body {
 
 /* Mobile responsive fixes */
 @media (max-width: 768px) {
-  .timeline-header {
-    margin-top: 20px;
-    padding: 0 15px;
-  }
-  .timeline-line {
-    left: 40px;
-    right: 40px;
-    top: 13px;
-  }
-  .node-circle {
-    width: 26px;
-    height: 26px;
-    font-size: 9px;
-  }
-  .node-label {
-    font-size: 8.5px;
-    margin-top: 8px;
-    letter-spacing: 0.05em;
+
+  .mouse-icon {
+    display: none;
   }
   .left-content-wrapper {
     margin-left: 6%;
@@ -421,8 +273,29 @@ html, body {
   .accent-text {
     font-size: 21px;
   }
-  .scroll-continue {
-    margin-bottom: 25px;
+  /* scroll-continue removed */
+  .folder-close-btn {
+    display: none !important;
+  }
+  .folder-close-floating {
+    display: flex;
+  }
+  .folder-tabs-scroll-container {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-right: 50px;
+    mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 85%, rgba(0, 0, 0, 0) 100%);
+    -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 85%, rgba(0, 0, 0, 0) 100%);
+  }
+  .folder-tabs-scroll-container::-webkit-scrollbar {
+    display: none;
+  }
+  .folder-tab-bar {
+    justify-content: flex-start;
+    padding-right: 48px;
+    overflow: visible;
   }
 }
 
@@ -951,6 +824,47 @@ html, body {
   background: rgba(255, 255, 255, 0.1) !important;
   border-color: rgba(255, 255, 255, 0.25) !important;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.folder-tabs-scroll-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  width: auto;
+  max-width: 100%;
+}
+
+.folder-tab {
+  flex-shrink: 0;
+}
+
+.folder-close-floating {
+  display: none;
+  position: absolute;
+  top: -46px;
+  right: 4px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #0d0d0f !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 24px;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+  padding: 0;
+  outline: none;
+}
+
+.folder-close-floating:hover {
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  background: #121215 !important;
 }
 
 /* Scrollable Interior Sheet */
@@ -2283,6 +2197,77 @@ html, body {
   100% {
     transform: translate3d(-50%, 0, 0);
   }
+}
+
+/* ── Mobile Snap Navigation Dock ─────────────────────────────────── */
+.mobile-snap-nav {
+  position: fixed;
+  bottom: 55px; /* Lifted up slightly */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 100;
+  pointer-events: auto;
+  background: rgba(13, 13, 13, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(197, 168, 128, 0.3);
+  padding: 8px 16px;
+  border-radius: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(197, 168, 128, 0.1);
+  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.snap-arrow-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-family: 'Space Mono', monospace;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.snap-arrow-btn:active {
+  background: rgba(197, 168, 128, 0.2) !important;
+  border-color: #c5a880;
+  transform: scale(0.95);
+}
+
+.snap-center-pill {
+  min-width: 140px;
+  height: 40px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(197, 168, 128, 0.15), rgba(197, 168, 128, 0.05)) !important;
+  border: 1.5px solid rgba(197, 168, 128, 0.45);
+  color: #c5a880;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-shadow: 0 0 8px rgba(197, 168, 128, 0.3);
+}
+
+.snap-center-pill:active {
+  background: #c5a880 !important;
+  color: #050505;
+  border-color: #c5a880;
+  transform: scale(0.97);
+  text-shadow: none;
 }
 
 

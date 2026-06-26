@@ -7,6 +7,7 @@ import { useEditorStore, getFurnitureDimensions } from './store';
 import { Sidebar, FURNITURE_CATALOG } from './components/Sidebar';
 
 import { Undo, Redo, X } from 'lucide-react';
+import PerformanceHUD from '../../../../components/PerformanceHUD';
 import './editor.css';
 
 const EditorPage = () => {
@@ -519,6 +520,10 @@ const EditorPage = () => {
           </button>
         </div>
       </div>
+      
+      {/* Performance Stats HUD Overlay */}
+      <PerformanceHUD />
+
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { Environment, ScrollControls, useScroll, useProgress } from '@react-thre
 import WatchModel from './components/Mainwatchfileforthelab'
 import Background from './components/Background'
 import Overlay from './components/Overlay'
+import PerformanceHUD from '../../../../components/PerformanceHUD'
 import './WatchLab.css'
 
 // --- 1. LOADER COMPONENT ---
@@ -88,6 +89,10 @@ export default function Watch() {
           </ScrollControls>
         </Suspense>
       </Canvas>
+
+      {/* Performance Stats HUD Overlay */}
+      <PerformanceHUD />
+
     </div>
   )
 }
